@@ -105,7 +105,7 @@ async def onlayn(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def kurs(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(
         "📚 10 kunlik onlayn davolash kursi\n\n"
-        "Bu kurs nevroz, xavotir va tushkunlik bilan ishlash uchun bosqichma-bosqich tuzilgan.\n"
+        "Bu kurs nevroz, xavotir va depressiya bilan ishlash uchun bosqichma-bosqich tuzilgan.\n"
         "Unda jonli tarzda tushuntirish, topshiriq va amaliy tavsiyalar beriladi.\n\n"
         "✅ Kurs ichida:\n"
         "• Har kungi yangi mavzular\n"
@@ -125,7 +125,7 @@ async def videolar(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "Bunda nevroz, xavotir va tushkunlikni tushunishga yordam beruvchi videolar to'plami beriladi.\n"
         "Mustaqil o'rganish uchun qulay va arzon format.\n\n"
         "✅ Nimalarni o'rganasiz:\n"
-        "• Nevroz va tushkunlik nima ekanini\n"
+        "• Nevroz va depressiya nima ekanini\n"
         "• Belgilarini\n"
         "• Rivojlanishini\n"
         "• Undan qutulish yo'llarini\n\n"
