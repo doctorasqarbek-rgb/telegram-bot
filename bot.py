@@ -7,7 +7,7 @@ ADMIN_ID = 741361382
 # Asosiy menyu
 main_keyboard = ReplyKeyboardMarkup(
     [
-        ["Xizmatlar", "Manzil"],
+        ["Xizmatlar"],
         ["Muammoyingiz nimada", "Bog'lanish"],
         ["Ko'p beriladigan savollar", "Qabulga yozilish"]
     ],
@@ -474,10 +474,6 @@ async def handle_buttons(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await xizmatlar(update, context)
     elif text == "Muammoyingiz nimada":
         await muammolar(update, context)
-    elif text == "Manzil":
-        await manzil(update, context)
-    elif text == "ALBATTA BORAMAN":
-        await manzilni_korsat(update, context)
     elif text == "Bog'lanish":
         await boglanish(update, context)
     elif text == "Ko'p beriladigan savollar":
@@ -533,8 +529,6 @@ def main():
 
     app.add_handler(CommandHandler("start", start))
     app.add_handler(CommandHandler("xizmatlar", xizmatlar))
-    app.add_handler(CommandHandler("narxlar", narxlar))
-    app.add_handler(CommandHandler("manzil", manzil))
     app.add_handler(CommandHandler("boglanish", boglanish))
     app.add_handler(CommandHandler("savollar", savollar))
     app.add_handler(CommandHandler("qabul", qabul))
@@ -547,4 +541,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-# update
