@@ -75,7 +75,8 @@ def muammo_keyboard():
 
 def muammolar_keyboard():
     return ReplyKeyboardMarkup([
-        ["Xavotir", "Vahima xuruji"], ["Tushkunlik", "Yopishqoq xayollar"],
+        ["Xavotir", "Vahima xuruji"],
+        ["Tushkunlik", "Yopishqoq xayollar"],
         ["Uyqu muammolari", "Yurak tez urib ketishi"],
         ["Nafas qisishi", "Tomoqqa tiqilish hissi"],
         ["Bosh og'rig'i", "Bosh aylanishi"],
@@ -89,134 +90,313 @@ tolov_keyboard = ReplyKeyboardMarkup([["✅ To'lovni tasdiqlayman"], ["⬅️ Or
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     context.user_data.clear()
     await update.message.reply_text(
-        "Assalomu alaykum.\n\nMen Doktor Ergashevning rasmiy ma'lumot beruvchi botiman.\nKerakli bo'limni tanlang:",
+        "Assalomu alaykum.\n\n"
+        "Men Doktor Ergashevning rasmiy ma'lumot beruvchi botiman.\n"
+        "Kerakli bo'limni tanlang:",
         reply_markup=main_keyboard)
 
 async def xizmatlar(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text("Kerakli xizmatni tanlang:", reply_markup=xizmat_keyboard)
+    await update.message.reply_text("📋 Kerakli xizmatni tanlang:", reply_markup=xizmat_keyboard)
 
 async def individual(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(
-        "Individual psixologik suhbat\n\nJonli formatda individual suhbat. Holat tahlil qilinadi, muammo sabablari aniqlanadi, tavsiyalar beriladi, zarur bo'lsa dorilar yozib beriladi.\n\nDavomiyligi: 30-60 daqiqa\nFormat: Jonli qabul\nNarxi: 600 ming so'm",
+        "🧠 Individual psixologik suhbat\n\n"
+        "Bu xizmatda siz bilan jonli formatda individual ishlanadi.\n"
+        "Suhbat davomida holatingiz tahlil qilinadi, muammoning sabablari aniqlanadi, "
+        "sizga mos tavsiyalar beriladi va vaziyatga qarab dorilar ham yozib beriladi.\n\n"
+        "✅ Kimlar uchun:\n"
+        "• Nevroz, xavotir, vahima, tushkunlik holatlari bo'lsa\n"
+        "• Psixologik jonli suhbat xohlovchilar uchun\n"
+        "• Ruhiy zo'riqish, asabiylik bo'lsa\n\n"
+        "⏱ Davomiyligi: 30-60 daqiqa\n"
+        "📍 Format: Jonli qabul\n"
+        "💰 Narxi: 600 ming so'm",
         reply_markup=muammo_keyboard())
 
 async def onlayn(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(
-        "Onlayn individual konsultatsiya\n\nMasofadan turib suhbat. Telegram orqali olib boriladi, zarur bo'lsa dorilar yozib beriladi.\n\nDavomiyligi: 30-60 daqiqa\nFormat: Onlayn\nNarxi: 500 ming so'm",
+        "🌐 Onlayn individual konsultatsiya\n\n"
+        "Bu xizmat masofadan turib suhbat qilish uchun mo'ljallangan.\n"
+        "Telegram yoki boshqa qulay ilova orqali olib boriladi va vaziyatga qarab dorilar ham yozib beriladi.\n\n"
+        "✅ Kimlar uchun:\n"
+        "• Uzoqda yashaydiganlar\n"
+        "• Vaqti cheklanganlar\n"
+        "• Uy sharoitida maslahat olishni xohlaydiganlar\n\n"
+        "⏱ Davomiyligi: 30-60 daqiqa\n"
+        "📱 Format: Onlayn\n"
+        "💰 Narxi: 500 ming so'm",
         reply_markup=muammo_keyboard())
 
 async def kurs(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(
-        "10 kunlik onlayn davolash kursi\n\nNevroz, xavotir va depressiya bilan ishlash uchun bosqichma-bosqich kurs.\n\nKurs ichida:\n- Har kungi yangi mavzular\n- Dorilar yozib berish\n- Amaliy mashqlar\n\nDavomiyligi: 10 kun\nFormat: Onlayn\nNarxi: 1 mln so'm",
+        "📚 10 kunlik onlayn davolash kursi\n\n"
+        "Bu kurs nevroz, xavotir va depressiya bilan ishlash uchun bosqichma-bosqich tuzilgan.\n"
+        "Unda jonli tarzda tushuntirish, topshiriq va amaliy tavsiyalar beriladi.\n\n"
+        "✅ Kurs ichida:\n"
+        "• Har kungi yangi mavzular\n"
+        "• Dorilar yozib berish\n"
+        "• Amaliy mashqlar\n"
+        "• Mustaqil ishlash uchun tavsiyalar\n\n"
+        "📅 Davomiyligi: 10 kun\n"
+        "📱 Format: Onlayn\n"
+        "💰 Narxi: 1 mln so'm",
         reply_markup=muammo_keyboard())
 
 async def videolar(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(
-        "Nevroz bo'yicha darslik videolari\n\nNevroz, xavotir va tushkunlikni tushunishga yordam beruvchi videolar.\n\nNimalarni o'rganasiz:\n- Nevroz va depressiya nima ekanini\n- Belgilarini va rivojlanishini\n- Undan qutulish yo'llarini\n\nFormat: Video darslar\nNarxi: 480 ming so'm",
+        "🎥 Nevroz bo'yicha darslik videolari\n\n"
+        "Bunda nevroz, xavotir va tushkunlikni tushunishga yordam beruvchi videolar to'plami beriladi.\n"
+        "Mustaqil o'rganish uchun qulay va arzon format.\n\n"
+        "✅ Nimalarni o'rganasiz:\n"
+        "• Nevroz va depressiya nima ekanini\n"
+        "• Belgilarini\n"
+        "• Rivojlanishini\n"
+        "• Undan qutulish yo'llarini\n\n"
+        "📹 Format: Video darslar\n"
+        "💰 Narxi: 480 ming so'm",
         reply_markup=muammo_keyboard())
 
-async def muammolar_fn(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text("Muammoyingizni tanlang:", reply_markup=muammolar_keyboard())
+async def muammolar(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await update.message.reply_text("📋 Muammoyingizni tanlang:", reply_markup=muammolar_keyboard())
 
 async def xavotir_info(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(
-        "Xavotir\n\nIchki bezovtalik, nimadandir yomon narsa kutish va ortiqcha o'ylash bilan kechadigan holat.\n\nBelgilari: ichki siqilish, tinchlana olmaslik, yurak tez urishi, bezovtalik, xayollarning to'xtamasligi.\n\nNevroz kasalligida kuzatiladi, suhbat va dorilar yordamida davolanadi.\n\nEslatma: Tibbiy tekshiruvlarda hech narsa aniqlanmasligi kerak!",
+        "😟 Xavotir\n\n"
+        "Xavotir — ichki bezovtalik, nimadandir yomon narsa kutish va ortiqcha o'ylash bilan kechadigan holat.\n\n"
+        "✅ Belgilari:\n"
+        "• Ichki siqilish\n"
+        "• Tinchlana olmaslik\n"
+        "• Yurak tez urishi\n"
+        "• Bezovtalik\n"
+        "• Xayollarning to'xtamasligi\n\n"
+        "📌 Bu holat Nevroz kasalligida kuzatiladi, suhbat va dorilar yordamida davolanadi.\n\n"
+        "❗ Eslatma: Sizda bu muammo bilan birga tibbiy tekshiruvlarda hech narsa aniqlanmasligi kerak!",
         reply_markup=muammo_keyboard())
 
 async def vahima_info(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(
-        "Vahima xuruji\n\nTo'satdan kuchli qo'rquv, yurak urishi, nafas qisishi.\n\nBelgilari: yurak tez urishi, nafas qisishi, titroq, kuchli qo'rquv.\n\nNevroz kasalligida kuzatiladi.\n\nEslatma: Tibbiy tekshiruvlarda hech narsa aniqlanmasligi kerak!",
+        "😰 Vahima xuruji\n\n"
+        "Vahima xuruji — to'satdan kuchli qo'rquv, yurak urishi, nafas qisishi va nazoratni yo'qotayotgandek hissiyot bilan kechadigan holat.\n\n"
+        "✅ Belgilari:\n"
+        "• Yurak tez urishi\n"
+        "• Nafas qisishi\n"
+        "• Qo'l-oyoqlarda titroq\n"
+        "• Kuchli qo'rquv\n"
+        "• O'lib qolayotgandek hissiyot\n\n"
+        "📌 Bu holat Nevroz kasalligida kuzatiladi, suhbat va dorilar yordamida davolanadi.\n\n"
+        "❗ Eslatma: Sizda bu muammo bilan birga tibbiy tekshiruvlarda hech narsa aniqlanmasligi kerak!",
         reply_markup=muammo_keyboard())
 
 async def tushkunlik_info(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(
-        "Tushkunlik\n\nKayfiyat pasayishi, hayotga qiziqish kamayishi va ichki bo'shliq hissi.\n\nBelgilari: kayfiyat pasayishi, qiziqish yo'qolishi, charchoq, umidsizlik.\n\nDepressiyada kuzatiladi.\n\nEslatma: Tibbiy tekshiruvlarda hech narsa aniqlanmasligi kerak!",
+        "🌫 Tushkunlik\n\n"
+        "Tushkunlik — kayfiyat pasayishi, hayotga qiziqish kamayishi va ichki bo'shliq hissi bilan kechadigan holat.\n\n"
+        "✅ Belgilari:\n"
+        "• Kayfiyatning pasayishi\n"
+        "• Qiziqish yo'qolishi\n"
+        "• Charchoq\n"
+        "• Umidsizlik\n"
+        "• Yolg'izlik hissi\n\n"
+        "📌 Bu holatda Depressiyada kuzatiladi, suhbat va dorilar yordamida davolanadi.\n\n"
+        "❗ Eslatma: Sizda bu muammo bilan birga tibbiy tekshiruvlarda hech narsa aniqlanmasligi kerak!",
         reply_markup=muammo_keyboard())
 
 async def yopishqoq_xayollar_info(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(
-        "Yopishqoq xayollar\n\nOngga qayta-qayta kelaveradigan, bezovta qiladigan fikrlar.\n\nBelgilari: bir xil fikrlarning takrorlanishi, bezovtalik, ichki zo'riqish.\n\nObsessiv Kompulsiv Nevrozda kuzatiladi.\n\nEslatma: Tibbiy tekshiruvlarda hech narsa aniqlanmasligi kerak!",
+        "🔄 Yopishqoq xayollar\n\n"
+        "Yopishqoq xayollar — ongga qayta-qayta kelaveradigan, bezovta qiladigan va to'xtatish qiyin bo'lgan fikrlar.\n\n"
+        "✅ Belgilari:\n"
+        "• Bir xil fikrlarning qayta qayta takrorlanishi\n"
+        "• Bezovtalik\n"
+        "• Xayollarni qutulib bo'lmaslik\n"
+        "• Ichki zo'riqish\n\n"
+        "📌 Bu holat ko'pincha Obsessiv Kompulsiv Nevroz kasalligida kuzatiladi, suhbat va dorilar yordamida davolanadi.\n\n"
+        "❗ Eslatma: Sizda bu muammo bilan birga tibbiy tekshiruvlarda hech narsa aniqlanmasligi kerak!",
         reply_markup=muammo_keyboard())
 
 async def uyqu_info(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(
-        "Uyqu muammolari\n\nUxlab qolish qiyinligi, tez uyg'onish.\n\nBelgilari: uxlash qiyin bo'lishi, sal narsaga uyg'onib ketish, kunduzi uyquchanlik.\n\nBunga stress, xavotir va ruhiy zo'riqish sabab bo'lishi mumkin.\n\nEslatma: Tibbiy tekshiruvlarda hech narsa aniqlanmasligi kerak!",
+        "🌙 Uyqu muammolari\n\n"
+        "Uyqu muammolari — uxlab qolish qiyinligi yoki ko'p uxlash, tez uyg'onish yoki uyqudan keyin dam olmagandek hissiyot bo'lish bilan kechadi.\n\n"
+        "✅ Belgilari:\n"
+        "• Uxlash qiyin bo'lishi yoki ba'zilarda ko'p uxlash\n"
+        "• Sal narsaga uyg'onib ketish\n"
+        "• Uyqudan charchoq bilan turish\n"
+        "• Kunduzi uyquchanlik\n\n"
+        "📌 Bunga stress, xavotir va ruhiy zo'riqish sabab bo'lishi mumkin.\n\n"
+        "❗ Eslatma: Sizda bu muammo bilan birga tibbiy tekshiruvlarda hech narsa aniqlanmasligi kerak!",
         reply_markup=muammo_keyboard())
 
 async def yurak_info(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(
-        "Yurak tez urib ketishi\n\nKo'pincha xavotir, vahima yoki ichki zo'riqish bilan bog'liq.\n\nBelgilari: yurakning kuchli urishi, ichki qo'rquv, bezovtalik, pulsni tez-tez o'lchash.\n\nNevroz kasalligida kuzatiladi.\n\nEslatma: Tibbiy tekshiruvlarda hech narsa aniqlanmasligi kerak!",
+        "❤️ Yurak tez urib ketishi\n\n"
+        "Yurakning tez urib ketishi ko'pincha xavotir, vahima yoki ichki zo'riqish bilan bog'liq bo'lishi mumkin.\n\n"
+        "✅ Belgilari:\n"
+        "• Yurakning kuchli urishi\n"
+        "• Ichki qo'rquv, xuddi yuragi to'xtab o'lib qoladiganday bo'lish\n"
+        "• Bezovtalik\n"
+        "• Yurak tez urishidan qo'rqib pulsni tez-tez o'lchash\n\n"
+        "📌 Bu holat Nevroz kasalligida kuzatiladi, suhbat va dorilar yordamida davolanadi.\n\n"
+        "❗ Eslatma: Sizda bu muammo bilan birga tibbiy tekshiruvlarda hech narsa aniqlanmasligi kerak!",
         reply_markup=muammo_keyboard())
 
 async def nafas_info(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(
-        "Nafas qisishi\n\nXavotir, vahima yoki ichki zo'riqish fonida paydo bo'ladi.\n\nBelgilari: to'liq nafas ololmaslik, ko'krakda siqilish, qo'rquv.\n\nNevroz kasalligida kuzatiladi.\n\nEslatma: Tibbiy tekshiruvlarda hech narsa aniqlanmasligi kerak!",
+        "😮‍💨 Nafas qisishi\n\n"
+        "Nafas qisishi hissi ba'zan xavotir, vahima yoki ichki zo'riqish fonida paydo bo'ladi.\n\n"
+        "✅ Belgilari:\n"
+        "• To'liq nafas ololmaslik hissi\n"
+        "• Ko'krakda siqilish\n"
+        "• Qo'rquv\n"
+        "• Tez-tez chuqur nafas olishga urinish\n\n"
+        "📌 Bu holat Nevroz kasalligida kuzatiladi, suhbat va dorilar yordamida davolanadi.\n\n"
+        "❗ Eslatma: Sizda bu muammo bilan birga tibbiy tekshiruvlarda hech narsa aniqlanmasligi kerak!",
         reply_markup=muammo_keyboard())
 
 async def tomoqqa_info(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(
-        "Tomoqqa tiqilish hissi\n\nKo'pincha xavotir va ichki zo'riqish bilan bog'liq.\n\nBelgilari: yutinish qiyin bo'lgandek tuyulishi, tomoqda nimadir bordek hissiyot.\n\nOrganik sabablar bo'lmasa psixosomatik.\n\nEslatma: Tibbiy tekshiruvlarda hech narsa aniqlanmasligi kerak!",
+        "🫢 Tomoqqa tiqilish hissi\n\n"
+        "Tomoqqa tiqilish hissi ko'pincha xavotir va ichki zo'riqish bilan bog'liq bo'lishi mumkin.\n\n"
+        "✅ Belgilari:\n"
+        "• Yutinish qiyin bo'lgandek tuyulishi\n"
+        "• Tomoqda nimadir bordek hissiyot\n"
+        "• Bezovtalik kuchayishi\n\n"
+        "📌 Organik sabablar bo'lmasa, bu holat psixosomatik bo'lishi mumkin. Ko'pincha Nevroz yoki Depressiyada kuzatiladi.\n\n"
+        "❗ Eslatma: Sizda bu muammo bilan birga tibbiy tekshiruvlarda hech narsa aniqlanmasligi kerak!",
         reply_markup=muammo_keyboard())
 
 async def bosh_ogriq_info(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(
-        "Bosh og'rig'i\n\nStress, xavotir va ruhiy zo'riqish bilan kuchayishi mumkin.\n\nBelgilari: boshda bosim hissi, peshona yoki ensa ogrigi, stress bilan kuchayishi.\n\nEslatma: Tibbiy tekshiruvlarda hech narsa aniqlanmasligi kerak!",
+        "🤕 Bosh og'rig'i\n\n"
+        "Bosh og'rig'i stress, xavotir va ruhiy zo'riqish bilan kuchayishi mumkin.\n\n"
+        "✅ Belgilari:\n"
+        "• Boshda bosim hissi\n"
+        "• Peshona yoki ensa og'rig'i, og'riqlar ko'pincha ko'chib yuradi\n"
+        "• Stress bilan og'riqning kuchayishi\n\n"
+        "📌 Ruhiy holat barqarorlashsa, boshdagi og'riqlar ham kamayishi mumkin.\n\n"
+        "❗ Eslatma: Sizda bu muammo bilan birga tibbiy tekshiruvlarda hech narsa aniqlanmasligi kerak!",
         reply_markup=muammo_keyboard())
 
 async def bosh_aylanish_info(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(
-        "Bosh aylanishi\n\nXavotir, qo'rquv va ichki zo'riqish bilan birga kuzatiladi.\n\nBelgilari: bosh aylangandek bo'lishi, muvozanat buzilgandek tuyulishi.\n\nOrganik sabablar bo'lmasa psixosomatik.\n\nEslatma: Tibbiy tekshiruvlarda hech narsa aniqlanmasligi kerak!",
+        "💫 Bosh aylanishi\n\n"
+        "Bosh aylanishi ba'zan xavotir, qo'rquv va ichki zo'riqish bilan birga kuzatiladi.\n\n"
+        "✅ Belgilari:\n"
+        "• Bosh aylangandek bo'lishi\n"
+        "• Muvozanat buzilgandek tuyulishi\n"
+        "• Qo'rquv bilan kuchayishi\n\n"
+        "📌 Organik sabablar bo'lmasa, bu holat psixosomatik bo'lishi mumkin. Ko'pincha Nevroz yoki Depressiyada kuzatiladi.\n\n"
+        "❗ Eslatma: Sizda bu muammo bilan birga tibbiy tekshiruvlarda hech narsa aniqlanmasligi kerak!",
         reply_markup=muammo_keyboard())
 
 async def ich_info(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(
-        "Ich kelishidagi muammolar\n\nStress, xavotir va ruhiy zo'riqish bilan bog'liq bo'lishi mumkin.\n\nBelgilari: ich qotishi yoki ich ketishi, qorin dam bo'lishi.\n\nEslatma: Tibbiy tekshiruvlarda hech narsa aniqlanmasligi kerak!",
+        "🚽 Ich kelishidagi muammolar\n\n"
+        "Ichaklar faoliyatidagi o'zgarishlar stress, xavotir va ruhiy zo'riqish bilan bog'liq bo'lishi mumkin.\n\n"
+        "✅ Belgilari:\n"
+        "• Ich qotishi yoki ich ketishi\n"
+        "• Qorin dam bo'lishi\n"
+        "• Ichakda noqulaylik\n\n"
+        "📌 Ichak faoliyatidagi muammo ko'pincha xavotir hissi paydo bo'lganda kuchayadi.\n\n"
+        "❗ Eslatma: Sizda bu muammo bilan birga tibbiy tekshiruvlarda hech narsa aniqlanmasligi kerak!",
         reply_markup=muammo_keyboard())
 
 async def peshob_info(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(
-        "Peshob qilish hissi\n\nXavotir va ichki zo'riqish bilan kuchayadi.\n\nBelgilari: tez-tez hojatga borish hissi, bezovtalik bilan kuchayishi.\n\nEslatma: Tibbiy tekshiruvlarda hech narsa aniqlanmasligi kerak!",
+        "🚻 Peshob qilish hissi\n\n"
+        "Tez-tez peshob qilish hissi ham ba'zan xavotir va ichki zo'riqish bilan kuchayadi.\n\n"
+        "✅ Belgilari:\n"
+        "• Tez-tez hojatga borish hissi\n"
+        "• Bezovtalik bilan kuchayishi\n"
+        "• Muhim paytda ko'proq sezilishi\n\n"
+        "📌 Organik sabablar bo'lmasa, bu ham psixosomatik ko'rinish bo'lishi mumkin.\n\n"
+        "❗ Eslatma: Sizda bu muammo bilan birga tibbiy tekshiruvlarda hech narsa aniqlanmasligi kerak!",
         reply_markup=muammo_keyboard())
 
 async def qaltirash_info(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(
-        "Tanadagi qaltirashlar\n\nXavotir, vahima va kuchli ichki zo'riqish paytida kuzatiladi.\n\nBelgilari: qo'l-oyoqlarda titroq, ichki qaltirash.\n\nKo'pincha Nevrozda kuchayadi.\n\nEslatma: Tibbiy tekshiruvlarda hech narsa aniqlanmasligi kerak!",
+        "🪨 Tanadagi qaltirashlar\n\n"
+        "Tanadagi qaltirashlar xavotir, vahima va kuchli ichki zo'riqish paytida kuzatilishi mumkin.\n\n"
+        "✅ Belgilari:\n"
+        "• Qo'l-oyoqlarda titroq\n"
+        "• Ichki qaltirash\n"
+        "• Qo'rquv bilan kuchayishi\n\n"
+        "📌 Bu holat asabiy zo'riqish bilan bog'liq bo'lishi mumkin, ko'pincha Nevrozda kuchayadi.\n\n"
+        "❗ Eslatma: Sizda bu muammo bilan birga tibbiy tekshiruvlarda hech narsa aniqlanmasligi kerak!",
         reply_markup=muammo_keyboard())
 
 async def vazn_info(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(
-        "Ozib ketish yoki semirish\n\nRuhiy holat, stress, xavotir yoki tushkunlik bilan bog'liq.\n\nBelgilari: ishtahaning kamayishi yoki oshishi, tez ozish, ortiqcha ovqat yeyish.\n\nEslatma: Tibbiy tekshiruvlarda hech narsa aniqlanmasligi kerak!",
+        "⚖️ Ozib ketish yoki semirish\n\n"
+        "Vaznning o'zgarishi ruhiy holat, stress, xavotir yoki tushkunlik bilan bog'liq bo'lishi mumkin.\n\n"
+        "✅ Belgilari:\n"
+        "• Ishtahaning kamayishi yoki oshishi\n"
+        "• Tez ozish\n"
+        "• Ortiqcha ovqat yeyish\n"
+        "• Emotsional ovqatlanish\n\n"
+        "📌 Ruhiy holatni to'g'rilansa insondagi ishtaha o'zgarishi ham o'z o'rniga tushadi.\n\n"
+        "❗ Eslatma: Sizda bu muammo bilan birga tibbiy tekshiruvlarda hech narsa aniqlanmasligi kerak!",
         reply_markup=muammo_keyboard())
 
 async def boglanish(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(
-        "Bog'lanish ma'lumotlari\n\nTelefon:\n+998 88 306 06 95\n\nInstagram:\nhttps://www.instagram.com/doktor.ergashev?igsh=MXc5eTN2NjF1NGZqaw==\n\nYouTube:\nhttps://youtube.com/@doktor_ergashev?si=s939zn1cW_N7BLu-")
+        "📞 Bog'lanish ma'lumotlari\n\n"
+        "📱 Telefon:\n"
+        "+998 88 306 06 95\n\n"
+        "📸 Instagram:\n"
+        "https://www.instagram.com/doktor.ergashev?igsh=MXc5eTN2NjF1NGZqaw==\n\n"
+        "🎥 YouTube:\n"
+        "https://youtube.com/@doktor_ergashev?si=s939zn1cW_N7BLu-")
 
 async def savollar(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(
-        "Ko'p beriladigan savollar\n\n"
-        "1. Psixoterapiya nima?\nRuhiy muammolarni suhbat orqali davolash usuli.\n\n"
-        "2. Bir marta kelish yetarlimi?\nAyrim insonlarda yetarli, lekin ko'pchilikda bir necha seans samaraliroq.\n\n"
-        "3. Dorilar majburiymi?\nYo'q, lekin ko'p hollarda (70-80%) yoziladi.\n\n"
-        "4. Qancha vaqtda natija bo'ladi?\nBa'zida 1 oy, odatda 2-3 oyda natija bo'ladi.\n\n"
-        "5. Onlayn davolanish samaralimi?\nHa, to'g'ri olib borilsa juda yaxshi natija beradi.\n\n"
-        "6. Bu sehr yoki jin tegish kasalligi emasmi?\nYo'q! Bu tibbiy-psixologik holat.\n\n"
-        "7. Butunlay sog'ayish mumkinmi?\nHa, ko'p hollarda (70%) to'liq sog'ayadi.\n\n"
-        "8. O'lib qolish yoki jinni bo'lib qolish mumkinmi?\nYo'q, bu holat hayot uchun xavfli emas.\n\n"
-        "9. Bu shizofreniya emasmi?\nYo'q. Shizofreniya boshqa kasallik.\n\n"
-        "10. Doktor Ergashev kim?\nToshkent Tibbiyot Akademiyasi magistr bitiruvchisi. 2023-yildan beri 3000+ bemor bilan ishlaydi.")
+        "❓ Ko'p beriladigan savollar\n\n"
+        "1️⃣ Psixoterapiya nima?\n"
+        "Psixoterapiya — bu ruhiy muammolarni suhbat orqali davolash usuli.\n\n"
+        "2️⃣ Bir marta kelish yetarlimi?\n"
+        "Ayrim insonlarda bitta konsultatsiya yetarli bo'lishi mumkin, lekin ko'pchilikda bir necha seans yoki 10 kunlik onlayn kurs samaraliroq bo'ladi.\n\n"
+        "3️⃣ Dorilar majburiymi?\n"
+        "Yo'q, har doim ham emas. Lekin ko'p hollarda (taxminan 70–80%) holatga qarab yoziladi.\n\n"
+        "4️⃣ Qancha vaqtda natija bo'ladi?\n"
+        "Bu sizning holatingizga bog'liq. Ba'zida tez (1 oy ichida), lekin odatda 2–3 oyda natija bo'ladi.\n\n"
+        "5️⃣ Onlayn davolanish ham samaralimi?\n"
+        "Ha, to'g'ri olib borilsa onlayn psixoterapiya ham juda yaxshi natija beradi.\n\n"
+        "6️⃣ Bu sehr yoki jin tegish kasalligi emasmi?\n"
+        "Yo'q! Nevroz yoki depressiya bu tibbiy-psixologik holat hisoblanadi.\n\n"
+        "7️⃣ Bu kasallikdan butunlay sog'ayish mumkinmi?\n"
+        "Ha, ko'p hollarda (taxminan 70%) insonlar to'liq sog'ayadi.\n\n"
+        "8️⃣ Bu kasallikdan o'lib qolish yoki jinni bo'lib qolish mumkinmi?\n"
+        "Yo'q, xavotir olmang. Bu holat hayot uchun xavfli emas va insonni jinni qilib qo'ymaydi.\n\n"
+        "9️⃣ Bu shizofreniya emasmi?\n"
+        "Yo'q. Shizofreniya jiddiy psixik kasallik bo'lib, u bilan psixiatrlar shug'ullanadi.\n\n"
+        "🔟 Doktor Ergashev kim?\n"
+        "Doktor Ergashev — Toshkent Tibbiyot Akademiyasi Tibbiy psixologiya yo'nalishi magistr bitiruvchisi. "
+        "2023-yildan beri faoliyat yuritadi va 3000 dan ortiq bemorlar bilan ishlab, nevroz va depressiv holatlarni davolab kelmoqda.")
 
 async def qabul(update: Update, context: ContextTypes.DEFAULT_TYPE):
     context.user_data["holat"] = "ism"
-    await update.message.reply_text("Qabulga yozilish\n\nIltimos, ism va familiyangizni yozing.")
+    await update.message.reply_text(
+        "📝 Qabulga yozilish\n\n"
+        "Iltimos, ism va familiyangizni yozing.")
 
 async def manzil(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    kb = ReplyKeyboardMarkup([["ALBATTA BORAMAN"], ["⬅️ Ortga"]], resize_keyboard=True)
-    await update.message.reply_text("DIQQAT!\n\nQABULGA YOZILIB KELISHINGIZ SHART!\nYOZILMASDA KELSANGIZ, QABULGA KIRMASDAN KETISHINGIZ MUMKIN.", reply_markup=kb)
+    manzil_keyboard = ReplyKeyboardMarkup([["ALBATTA BORAMAN"], ["⬅️ Ortga"]], resize_keyboard=True)
+    await update.message.reply_text(
+        "⚠️ DIQQAT!\n\n"
+        "QABULGA YOZILIB KELISHINGIZ SHART, CHUNKI BU ODDIY DORI YOZIB BERISH EMAS, "
+        "PSIXOTERAPIYA HISOBLANADI!\n\n"
+        "YOZILMASDAN KELSANGIZ, QABULGA KIRMASDAN KETISHINGIZ MUMKIN.\n\n"
+        "AGAR KELISHINGIZ ANIQ BO'LMASA, ILTIMOS, SIZNING O'RNINGIZGA BOSHQA INSON KELISHI MUMKIN. "
+        "SHUNING UCHUN SHUNCHAKI YOL'G'ONDAN 'KELAMAN' DEB O'ZINGIZNING, DOKTORNING VA BOSHQALARNING "
+        "VAQTINI O'G'IRLAMANG!",
+        reply_markup=manzil_keyboard)
 
 async def manzilni_korsat(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(
-        "SOSH MEDICAL klinikasi\n\nManzil: Yunusobod tumani, 13-mavze, Yangishahar ko'chasi 64a uy\n\nLOKATSIYA:\nhttps://yandex.com/navi/?whatshere%5Bzoom%5D=18&whatshere%5Bpoint%5D=69.296029%2C41.364923&lang=uz&from=navi")
+        "🏥 SOSH MEDICAL klinikasi\n\n"
+        "📍 Manzil: Yunusobod tumani, 13-mavze, Yangishahar ko'chasi 64a uy\n\n"
+        "🗺 LOKATSIYA:\n"
+        "https://yandex.com/navi/?whatshere%5Bzoom%5D=18&whatshere%5Bpoint%5D=69.296029%2C41.364923&lang=uz&from=navi")
 
 async def guruhga_kirish(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.effective_user
@@ -227,25 +407,31 @@ async def guruhga_kirish(update: Update, context: ContextTypes.DEFAULT_TYPE):
             reply_markup=main_keyboard)
         return
     await update.message.reply_text(
-        "Yopiq guruh haqida\n\n"
+        "🔒 Yopiq guruh haqida\n\n"
         "Bu guruhda inson ruhiyati, ruhiy buzilish va kasalliklar haqidagi "
         "qimmatli ma'lumotlarni atigi 100 ming so'm evaziga oylik obuna bo'lish orqali o'rganib borasiz.\n\n"
         "Obuna bo'lish uchun quyidagi karta raqamiga to'lov qiling:")
     await update.message.reply_text(
-        "To'lov ma'lumotlari\n\nNarxi: " + NARX + " / oy\n\nKarta raqami:\n" + KARTA_RAQAM +
-        "\nKarta egasi: " + KARTA_EGASI + "\n\nTo'lovni amalga oshirgach, to'lov chekining rasmini shu chatga yuboring.\nAdmin 5-10 daqiqa ichida guruh linkini yuboradi.",
+        "💳 To'lov ma'lumotlari\n\n"
+        "💰 Narxi: " + NARX + " / oy\n\n"
+        "Karta raqami:\n" + KARTA_RAQAM + "\n"
+        "Karta egasi: " + KARTA_EGASI + "\n\n"
+        "To'lovni amalga oshirgach, to'lov chekining rasmini shu chatga yuboring.\n"
+        "Admin 5-10 daqiqa ichida guruh linkini yuboradi.",
         reply_markup=tolov_keyboard)
     context.user_data["holat"] = "tolov_kutish"
 
 async def handle_payment_media(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    user = update.effective_user
+    if user.id == ADMIN_ID:
+        return
     holat = context.user_data.get("holat")
     if holat not in ("tolov_kutish", None, "tolov_yuborildi"):
         return
-    user = update.effective_user
     uname = "@" + user.username if user.username else "yo'q"
-    caption = "Yangi to'lov so'rovi!\n\nIsm: " + str(user.full_name) + "\nID: " + str(user.id) + "\nUsername: " + uname
+    caption = "📥 Yangi to'lov so'rovi!\n\n👤 Ism: " + str(user.full_name) + "\n🆔 ID: " + str(user.id) + "\n📎 Username: " + uname
     inline_kb = InlineKeyboardMarkup([[
-        InlineKeyboardButton("✅ Tasdiqlash", callback_data="t:" + str(user.id) + ":" + str(user.full_name)),
+        InlineKeyboardButton("✅ Tasdiqlash", callback_data="t:" + str(user.id)),
         InlineKeyboardButton("❌ Rad etish", callback_data="r:" + str(user.id))
     ]])
     if update.message.photo:
@@ -253,7 +439,7 @@ async def handle_payment_media(update: Update, context: ContextTypes.DEFAULT_TYP
     elif update.message.document:
         await context.bot.send_document(chat_id=ADMIN_ID, document=update.message.document.file_id, caption=caption, reply_markup=inline_kb)
     context.user_data["holat"] = "tolov_yuborildi"
-    await update.message.reply_text("To'lov chekingiz adminga yuborildi.\n5-10 daqiqa ichida guruh linki yuboriladi. Sabr biling!", reply_markup=main_keyboard)
+    await update.message.reply_text("✅ To'lov chekingiz adminga yuborildi.\n5-10 daqiqa ichida guruh linki yuboriladi. Sabr biling!", reply_markup=main_keyboard)
 
 async def callback_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
@@ -262,11 +448,12 @@ async def callback_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
     data = query.data
     if data.startswith("t:"):
-        parts = data.split(":", 2)
-        user_id = int(parts[1])
-        full_name = parts[2] if len(parts) > 2 else "Noma'lum"
-        sub = get_subscriber(user_id)
-        username = sub[1] if sub else None
+        user_id = int(data.split(":")[1])
+        try:
+            chat = await context.bot.get_chat(user_id)
+            full_name = chat.full_name; username = chat.username
+        except Exception:
+            full_name = "Noma'lum"; username = None
         end_date = add_subscriber(user_id, username, full_name)
         try:
             invite = await context.bot.create_chat_invite_link(chat_id=GURUH_ID, member_limit=1, name=str(full_name)[:30])
@@ -275,18 +462,18 @@ async def callback_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
             link = GURUH_LINK
         try:
             await context.bot.send_message(chat_id=user_id, text=
-                "To'lovingiz tasdiqlandi!\n\nTabriklaymiz!\n\nObuna muddati: 1 oy (" + str(end_date) + " gacha)\n\n"
-                "Guruh linki (faqat siz uchun, 1 martalik):\n" + link + "\n\nMuddat tugagach, qayta to'lov qiling.")
-            await query.edit_message_caption(caption="Tasdiqlandi: " + str(full_name) + "\n" + str(end_date) + " gacha")
+                "✅ To'lovingiz tasdiqlandi!\n\nTabriklaymiz! 🎉\n\nObuna muddati: 1 oy (" + str(end_date) + " gacha)\n\n"
+                "🔗 Guruh linki (faqat siz uchun, 1 martalik):\n" + link + "\n\nMuddat tugagach, qayta to'lov qiling.")
+            await query.edit_message_caption(caption="✅ Tasdiqlandi: " + str(full_name) + "\n📅 " + str(end_date) + " gacha")
         except Exception as e:
-            await query.edit_message_caption(caption="Xatolik: " + str(e))
+            await query.edit_message_caption(caption="⚠️ Xatolik: " + str(e))
     elif data.startswith("r:"):
         user_id = int(data.split(":")[1])
         try:
-            await context.bot.send_message(chat_id=user_id, text="Kechirasiz, to'lovingiz tasdiqlanmadi.\nQayta to'lov qilib chek yuboring.")
-            await query.edit_message_caption(caption="Rad etildi (ID: " + str(user_id) + ")")
+            await context.bot.send_message(chat_id=user_id, text="❌ Kechirasiz, to'lovingiz tasdiqlanmadi.\nQayta to'lov qilib chek yuboring.")
+            await query.edit_message_caption(caption="❌ Rad etildi (ID: " + str(user_id) + ")")
         except Exception as e:
-            await query.edit_message_caption(caption="Xatolik: " + str(e))
+            await query.edit_message_caption(caption="⚠️ Xatolik: " + str(e))
 
 async def tasdiqlash(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update.effective_user.id != ADMIN_ID: return
@@ -307,9 +494,9 @@ async def tasdiqlash(update: Update, context: ContextTypes.DEFAULT_TYPE):
         link = GURUH_LINK
     try:
         await context.bot.send_message(chat_id=user_id, text=
-            "To'lovingiz tasdiqlandi!\n\nTabriklaymiz!\n\nObuna muddati: 1 oy (" + str(end_date) + " gacha)\n\n"
-            "Guruh linki (faqat siz uchun, 1 martalik):\n" + link + "\n\nMuddat tugagach, qayta to'lov qiling.")
-        await update.message.reply_text(str(full_name) + " tasdiqlandi. Guruh linki yuborildi.")
+            "✅ To'lovingiz tasdiqlandi!\n\nTabriklaymiz! 🎉\n\nObuna muddati: 1 oy (" + str(end_date) + " gacha)\n\n"
+            "🔗 Guruh linki (faqat siz uchun, 1 martalik):\n" + link + "\n\nMuddat tugagach, qayta to'lov qiling.")
+        await update.message.reply_text("✅ " + str(full_name) + " tasdiqlandi. Guruh linki yuborildi.")
     except Exception as e:
         await update.message.reply_text("Xatolik: " + str(e))
 
@@ -320,8 +507,8 @@ async def rad_etish(update: Update, context: ContextTypes.DEFAULT_TYPE):
     try: user_id = int(context.args[0])
     except: await update.message.reply_text("Noto'g'ri user_id"); return
     try:
-        await context.bot.send_message(chat_id=user_id, text="Kechirasiz, to'lovingiz tasdiqlanmadi.\nQayta to'lov qilib chek yuboring.")
-        await update.message.reply_text("User " + str(user_id) + " rad etildi.")
+        await context.bot.send_message(chat_id=user_id, text="❌ Kechirasiz, to'lovingiz tasdiqlanmadi.\nQayta to'lov qilib chek yuboring.")
+        await update.message.reply_text("❌ User " + str(user_id) + " rad etildi.")
     except Exception as e:
         await update.message.reply_text("Xatolik: " + str(e))
 
@@ -330,12 +517,12 @@ async def azolar(update: Update, context: ContextTypes.DEFAULT_TYPE):
     rows = get_all_active()
     if not rows:
         await update.message.reply_text("Hozircha faol a'zolar yo'q."); return
-    text = "Faol obunachlar: " + str(len(rows)) + " ta\n\n"
+    text = "👥 Faol obunachlar: " + str(len(rows)) + " ta\n\n"
     for row in rows:
         uid, uname, fname, sd, ed, act = row
-        text += fname + "\nID: " + str(uid)
+        text += "👤 " + fname + "\n🆔 " + str(uid)
         if uname: text += " | @" + uname
-        text += "\n" + str(sd) + " - " + str(ed) + "\n\n"
+        text += "\n📅 " + str(sd) + " → " + str(ed) + "\n\n"
     await update.message.reply_text(text)
 
 async def guruh_id_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -347,10 +534,13 @@ async def warn_expiring_subscriptions(context: ContextTypes.DEFAULT_TYPE):
         uid, uname, fname, sd, ed, act = row
         try:
             await context.bot.send_message(chat_id=uid, text=
-                "Obuna muddatingiz tugashiga 7 kun qoldi!\n\nMuddat: " + str(ed) + "\n\n"
-                "Guruhda qolish uchun qayta to'lov qiling:\n\nKarta: " + KARTA_RAQAM +
-                "\nEgasi: " + KARTA_EGASI + "\nNarxi: " + NARX +
-                "\n\nTo'lovdan so'ng chekni botga yuboring - admin tasdiqlaydi va obunangiz uzaytiriladi.")
+                "⏰ Obuna muddatingiz tugashiga 7 kun qoldi!\n\n"
+                "📅 Muddat: " + str(ed) + "\n\n"
+                "Guruhda qolish uchun qayta to'lov qiling:\n\n"
+                "💳 Karta: " + KARTA_RAQAM + "\n"
+                "👤 Egasi: " + KARTA_EGASI + "\n"
+                "💰 Narxi: " + NARX + "\n\n"
+                "To'lovdan so'ng chekni botga yuboring — admin tasdiqlaydi va obunangiz uzaytiriladi.")
         except Exception as e:
             logging.error("Warn error: " + str(e))
 
@@ -365,35 +555,35 @@ async def check_expired_subscriptions(context: ContextTypes.DEFAULT_TYPE):
                 logging.error("Kick error: " + str(e))
         try:
             await context.bot.send_message(chat_id=uid, text=
-                "Obuna muddatingiz tugadi!\n\nGuruhdan chiqarildingiz.\n\nQayta obuna bo'lish uchun:\n/start - Yopiq guruhga kirish")
+                "❌ Obuna muddatingiz tugadi!\n\nGuruhdan chiqarildingiz.\n\nQayta obuna bo'lish uchun /start dan Yopiq guruhga kirish tugmasini bosing.")
         except Exception as e:
             logging.error("Notify error: " + str(e))
         deactivate(uid)
-        await context.bot.send_message(chat_id=ADMIN_ID, text="Obuna tugadi: " + str(fname) + " (ID: " + str(uid) + ") guruhdan chiqarildi.")
+        await context.bot.send_message(chat_id=ADMIN_ID, text="📤 Obuna tugadi: " + str(fname) + " (ID: " + str(uid) + ") guruhdan chiqarildi.")
 
 async def handle_buttons(update: Update, context: ContextTypes.DEFAULT_TYPE):
     text = update.message.text
     if context.user_data.get("holat") == "ism":
         context.user_data["ism"] = text; context.user_data["holat"] = "telefon"
-        await update.message.reply_text("Telefon raqamingizni yozing:"); return
+        await update.message.reply_text("📞 Telefon raqamingizni yozing:"); return
     if context.user_data.get("holat") == "telefon":
         context.user_data["telefon"] = text; context.user_data["holat"] = "muammo"
-        await update.message.reply_text("Muammoingizni yozing:"); return
+        await update.message.reply_text("💬 Muammoingizni yozing:"); return
     if context.user_data.get("holat") == "muammo":
         ism = context.user_data.get("ism"); telefon = context.user_data.get("telefon")
         context.user_data["holat"] = None
-        await update.message.reply_text("So'rovingiz qabul qilindi, tez orada bog'lanamiz!", reply_markup=main_keyboard)
-        await context.bot.send_message(chat_id=ADMIN_ID, text="Yangi qabul:\nIsm: "+str(ism)+"\nTelefon: "+str(telefon)+"\nMuammo: "+str(text))
+        await update.message.reply_text("✅ So'rovingiz qabul qilindi, tez orada siz bilan bog'lanamiz!", reply_markup=main_keyboard)
+        await context.bot.send_message(chat_id=ADMIN_ID, text=f"📥 Yangi qabul:\n\n👤 {ism}\n📞 {telefon}\n💬 {text}")
         return
     if text == "Xizmatlar": await xizmatlar(update, context)
-    elif text == "Muammoyingiz nimada": await muammolar_fn(update, context)
+    elif text == "Muammoyingiz nimada": await muammolar(update, context)
     elif text == "Bog'lanish": await boglanish(update, context)
     elif text == "Ko'p beriladigan savollar": await savollar(update, context)
     elif text in ("Qabulga yozilish", "🟢 Qabulga yozilish"): await qabul(update, context)
     elif text == "💳 Yopiq guruhga kirish": await guruhga_kirish(update, context)
     elif text == "✅ To'lovni tasdiqlayman":
         if context.user_data.get("holat") == "tolov_kutish":
-            await update.message.reply_text("To'lov chekining rasmini yuboring.")
+            await update.message.reply_text("📸 To'lov chekining rasmini yuboring.")
         else:
             await guruhga_kirish(update, context)
     elif text == "🧠 Individual suhbat": await individual(update, context)
