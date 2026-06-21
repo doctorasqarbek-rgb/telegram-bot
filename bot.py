@@ -559,13 +559,24 @@ async def callback_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
         end_date = add_subscriber(user_id, username, full_name)
 
         try:
+            # Bir martalik unikal link yaratish
+            invite = await context.bot.create_chat_invite_link(
+                chat_id=GURUH_ID,
+                member_limit=1,
+                name=f"{full_name} ({user_id})"
+            )
+            link = invite.invite_link
+        except Exception:
+            link = GURUH_LINK  # Xatolik bo'lsa eski linkni ishlatamiz
+
+        try:
             await context.bot.send_message(
                 chat_id=user_id,
                 text=(
                     f"✅ To'lovingiz tasdiqlandi!\n\n"
                     f"🎉 Tabriklaymiz! Siz yopiq guruhga a'zo bo'ldingiz.\n\n"
                     f"📅 Obuna muddati: 1 oy ({end_date} gacha)\n\n"
-                    f"🔗 Guruh linki:\n{GURUH_LINK}\n\n"
+                    f"🔗 Guruh linki (faqat siz uchun, 1 martalik):\n{link}\n\n"
                     f"Muddat tugagach, qayta to'lov qilib obunani yangilang."
                 )
             )
@@ -622,13 +633,23 @@ async def tasdiqlash(update: Update, context: ContextTypes.DEFAULT_TYPE):
     end_date = add_subscriber(user_id, username, full_name)
 
     try:
+        invite = await context.bot.create_chat_invite_link(
+            chat_id=GURUH_ID,
+            member_limit=1,
+            name=f"{full_name} ({user_id})"
+        )
+        link = invite.invite_link
+    except Exception:
+        link = GURUH_LINK
+
+    try:
         await context.bot.send_message(
             chat_id=user_id,
             text=(
                 f"✅ To'lovingiz tasdiqlandi!\n\n"
                 f"🎉 Tabriklaymiz! Siz yopiq guruhga a'zo bo'ldingiz.\n\n"
                 f"📅 Obuna muddati: 1 oy ({end_date} gacha)\n\n"
-                f"🔗 Guruh linki:\n{GURUH_LINK}\n\n"
+                f"🔗 Guruh linki (faqat siz uchun, 1 martalik):\n{link}\n\n"
                 f"Muddat tugagach, qayta to'lov qilib obunani yangilang."
             )
         )
