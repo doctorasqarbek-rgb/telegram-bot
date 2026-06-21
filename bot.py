@@ -1,10 +1,10 @@
 import sqlite3
 import datetime
 import logging
-from telegram import ReplyKeyboardMarkup, Update
+from telegram import ReplyKeyboardMarkup, Update, InlineKeyboardMarkup, InlineKeyboardButton
 from telegram.ext import (
     ApplicationBuilder, CommandHandler, MessageHandler,
-    ContextTypes, filters
+    ContextTypes, filters, CallbackQueryHandler
 )
 
 logging.basicConfig(level=logging.INFO)
@@ -504,22 +504,29 @@ async def handle_payment_media(update: Update, context: ContextTypes.DEFAULT_TYP
         f"💳 Yangi to'lov so'rovi!\n\n"
         f"👤 Ism: {user.full_name}\n"
         f"🆔 ID: {user.id}\n"
-        f"📱 Username: {username_str}\n\n"
-        f"✅ Tasdiqlash: /tasdiqlash {user.id}\n"
-        f"❌ Rad etish: /rad {user.id}"
+        f"📱 Username: {username_str}"
     )
+
+    inline_kb = InlineKeyboardMarkup([
+        [
+            InlineKeyboardButton("✅ Tasdiqlash", callback_data=f"tasdiqlash:{user.id}:{user.full_name}"),
+            InlineKeyboardButton("❌ Rad etish", callback_data=f"rad:{user.id}")
+        ]
+    ])
 
     if update.message.photo:
         await context.bot.send_photo(
             chat_id=ADMIN_ID,
             photo=update.message.photo[-1].file_id,
-            caption=caption
+            caption=caption,
+            reply_markup=inline_kb
         )
     elif update.message.document:
         await context.bot.send_document(
             chat_id=ADMIN_ID,
             document=update.message.document.file_id,
-            caption=caption
+            caption=caption,
+            reply_markup=inline_kb
         )
 
     context.user_data["holat"] = "tolov_yuborildi"
@@ -528,6 +535,62 @@ async def handle_payment_media(update: Update, context: ContextTypes.DEFAULT_TYP
         "5–10 daqiqa ichida guruh linki yuboriladi. Sabr biling! 🙏",
         reply_markup=main_keyboard
     )
+
+# ===================== INLINE TUGMA CALLBACK =====================
+
+async def callback_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
+    await query.answer()
+
+    if query.from_user.id != ADMIN_ID:
+        return
+
+    data = query.data
+
+    if data.startswith("tasdiqlash:"):
+        parts = data.split(":", 2)
+        user_id = int(parts[1])
+        full_name = parts[2] if len(parts) > 2 else "Noma'lum"
+
+        sub = get_subscriber(user_id)
+        username = sub[1] if sub else None
+        end_date = add_subscriber(user_id, username, full_name)
+
+        try:
+            await context.bot.send_message(
+                chat_id=user_id,
+                text=(
+                    f"✅ To'lovingiz tasdiqlandi!\n\n"
+                    f"🎉 Tabriklaymiz! Siz yopiq guruhga a'zo bo'ldingiz.\n\n"
+                    f"📅 Obuna muddati: 1 oy ({end_date} gacha)\n\n"
+                    f"🔗 Guruh linki:\n{GURUH_LINK}\n\n"
+                    f"Muddat tugagach, qayta to'lov qilib obunani yangilang."
+                )
+            )
+            await query.edit_message_caption(
+                caption=f"✅ Tasdiqlandi: {full_name} (ID: {user_id})\n📅 {end_date} gacha"
+            )
+        except Exception as e:
+            await query.edit_message_caption(caption=f"Xatolik: {e}")
+
+    elif data.startswith("rad:"):
+        user_id = int(data.split(":")[1])
+
+        try:
+            await context.bot.send_message(
+                chat_id=user_id,
+                text=(
+                    "❌ Kechirasiz, to'lovingiz tasdiqlanmadi.\n\n"
+                    "Muammo bo'lsa, admin bilan bog'laning yoki "
+                    "qayta to'lov qilib chek yuboring."
+                )
+            )
+            await query.edit_message_caption(
+                caption=f"❌ Rad etildi (ID: {user_id})"
+            )
+        except Exception as e:
+            await query.edit_message_caption(caption=f"Xatolik: {e}")
+
 
 # ===================== ADMIN KOMANDALAR =====================
 
@@ -793,6 +856,9 @@ def main():
     app.add_handler(CommandHandler("tasdiqlash", tasdiqlash))
     app.add_handler(CommandHandler("rad", rad_etish))
     app.add_handler(CommandHandler("azolar", azolar))
+
+    # Inline tugma callback
+    app.add_handler(CallbackQueryHandler(callback_handler))
 
     # Rasm/fayl yuborish (to'lov cheki)
     app.add_handler(MessageHandler(
