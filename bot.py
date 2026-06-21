@@ -1,20 +1,102 @@
+import sqlite3
+import datetime
+import logging
 from telegram import ReplyKeyboardMarkup, Update
-from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, ContextTypes, filters
+from telegram.ext import (
+    ApplicationBuilder, CommandHandler, MessageHandler,
+    ContextTypes, filters
+)
+
+logging.basicConfig(level=logging.INFO)
 
 TOKEN = "6411235489:AAGBVw5jHOQvlfOnQAUouKsYi0MtDfmJSzY"
 ADMIN_ID = 741361382
 
-# Asosiy menyu
+# ===================== TO'LOV MA'LUMOTLARI =====================
+KARTA_RAQAM = "9860 1606 0775 6576"
+KARTA_EGASI = "Sevinch Ergasheva"
+NARX = "100 000 so'm"
+GURUH_LINK = "https://t.me/+PujFAoCdY85kMDQy"
+
+# Guruh ID — botni guruhga admin qilib qo'shing va /guruh_id komandasi yuboring
+GURUH_ID = None  # Masalan: -1001234567890
+
+# ===================== DATABASE =====================
+
+def init_db():
+    conn = sqlite3.connect("subscribers.db")
+    c = conn.cursor()
+    c.execute("""
+        CREATE TABLE IF NOT EXISTS subscribers (
+            user_id   INTEGER PRIMARY KEY,
+            username  TEXT,
+            full_name TEXT,
+            start_date TEXT,
+            end_date   TEXT,
+            active     INTEGER DEFAULT 1
+        )
+    """)
+    conn.commit()
+    conn.close()
+
+def add_subscriber(user_id, username, full_name):
+    conn = sqlite3.connect("subscribers.db")
+    c = conn.cursor()
+    start = datetime.date.today()
+    end = start + datetime.timedelta(days=30)
+    c.execute("""
+        INSERT OR REPLACE INTO subscribers
+            (user_id, username, full_name, start_date, end_date, active)
+        VALUES (?, ?, ?, ?, ?, 1)
+    """, (user_id, username or "", full_name, str(start), str(end)))
+    conn.commit()
+    conn.close()
+    return end
+
+def get_subscriber(user_id):
+    conn = sqlite3.connect("subscribers.db")
+    c = conn.cursor()
+    c.execute("SELECT * FROM subscribers WHERE user_id = ?", (user_id,))
+    row = c.fetchone()
+    conn.close()
+    return row
+
+def get_all_active():
+    conn = sqlite3.connect("subscribers.db")
+    c = conn.cursor()
+    c.execute("SELECT * FROM subscribers WHERE active = 1")
+    rows = c.fetchall()
+    conn.close()
+    return rows
+
+def get_expired():
+    conn = sqlite3.connect("subscribers.db")
+    c = conn.cursor()
+    today = str(datetime.date.today())
+    c.execute("SELECT * FROM subscribers WHERE active = 1 AND end_date < ?", (today,))
+    rows = c.fetchall()
+    conn.close()
+    return rows
+
+def deactivate(user_id):
+    conn = sqlite3.connect("subscribers.db")
+    c = conn.cursor()
+    c.execute("UPDATE subscribers SET active = 0 WHERE user_id = ?", (user_id,))
+    conn.commit()
+    conn.close()
+
+# ===================== KLAVIATURALAR =====================
+
 main_keyboard = ReplyKeyboardMarkup(
     [
         ["Xizmatlar"],
         ["Muammoyingiz nimada", "Bog'lanish"],
-        ["Ko'p beriladigan savollar", "Qabulga yozilish"]
+        ["Ko'p beriladigan savollar", "Qabulga yozilish"],
+        ["💳 Yopiq guruhga kirish"]
     ],
     resize_keyboard=True
 )
 
-# Xizmatlar menyusi
 xizmat_keyboard = ReplyKeyboardMarkup(
     [
         ["🧠 Individual suhbat"],
@@ -26,17 +108,12 @@ xizmat_keyboard = ReplyKeyboardMarkup(
     resize_keyboard=True
 )
 
-# Muammo matnlari ostidagi tugmalar
 def muammo_keyboard():
     return ReplyKeyboardMarkup(
-        [
-            ["🟢 Qabulga yozilish"],
-            ["⬅️ Ortga"]
-        ],
+        [["🟢 Qabulga yozilish"], ["⬅️ Ortga"]],
         resize_keyboard=True
     )
 
-# Muammolar ro'yxati
 def muammolar_keyboard():
     return ReplyKeyboardMarkup(
         [
@@ -52,8 +129,15 @@ def muammolar_keyboard():
         resize_keyboard=True
     )
 
+tolov_keyboard = ReplyKeyboardMarkup(
+    [["✅ To'lovni tasdiqlayman"], ["⬅️ Ortga"]],
+    resize_keyboard=True
+)
+
+# ===================== ASOSIY KOMANDALAR =====================
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    context.user_data.clear()
     await update.message.reply_text(
         "Assalomu alaykum.\n\n"
         "Men Doktor Ergashevning rasmiy ma'lumot beruvchi botiman.\n"
@@ -61,13 +145,10 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         reply_markup=main_keyboard
     )
 
+# ===================== XIZMATLAR =====================
 
 async def xizmatlar(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text(
-        "📋 Kerakli xizmatni tanlang:",
-        reply_markup=xizmat_keyboard
-    )
-
+    await update.message.reply_text("📋 Kerakli xizmatni tanlang:", reply_markup=xizmat_keyboard)
 
 async def individual(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(
@@ -85,7 +166,6 @@ async def individual(update: Update, context: ContextTypes.DEFAULT_TYPE):
         reply_markup=muammo_keyboard()
     )
 
-
 async def onlayn(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(
         "🌐 Onlayn individual konsultatsiya\n\n"
@@ -100,7 +180,6 @@ async def onlayn(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "💰 Narxi: 500 ming so'm",
         reply_markup=muammo_keyboard()
     )
-
 
 async def kurs(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(
@@ -118,7 +197,6 @@ async def kurs(update: Update, context: ContextTypes.DEFAULT_TYPE):
         reply_markup=muammo_keyboard()
     )
 
-
 async def videolar(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(
         "🎥 Nevroz bo'yicha darslik videolari\n\n"
@@ -134,13 +212,10 @@ async def videolar(update: Update, context: ContextTypes.DEFAULT_TYPE):
         reply_markup=muammo_keyboard()
     )
 
-
 async def muammolar(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text(
-        "📋 Muammoyingizni tanlang:",
-        reply_markup=muammolar_keyboard()
-    )
+    await update.message.reply_text("📋 Muammoyingizni tanlang:", reply_markup=muammolar_keyboard())
 
+# ===================== MUAMMO MA'LUMOTLARI =====================
 
 async def xavotir_info(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(
@@ -151,12 +226,12 @@ async def xavotir_info(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "• Tinchlana olmaslik\n"
         "• Yurak tez urishi\n"
         "• Bezovtalik\n"
-        "• Xayollarning to'xtamasligi\n\n"                                                                                                                               	"• Hali ro'y bermagan holatlardan qo'rqish\n\n"
+        "• Xayollarning to'xtamasligi\n"
+        "• Hali ro'y bermagan holatlardan qo'rqish\n\n"
         "📌 Bu holat Nevroz kasalligida kuzatiladi suhbat va dorilar yordamida davolanadi.\n\n"
         "❗ Eslatma: Sizda bu muammo bilan birga tibbiy tekshiruvlarda hech narsa aniqlanmasligi kerak!",
         reply_markup=muammo_keyboard()
     )
-
 
 async def vahima_info(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(
@@ -173,7 +248,6 @@ async def vahima_info(update: Update, context: ContextTypes.DEFAULT_TYPE):
         reply_markup=muammo_keyboard()
     )
 
-
 async def tushkunlik_info(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(
         "🌫 Tushkunlik\n\n"
@@ -189,7 +263,6 @@ async def tushkunlik_info(update: Update, context: ContextTypes.DEFAULT_TYPE):
         reply_markup=muammo_keyboard()
     )
 
-
 async def yopishqoq_xayollar_info(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(
         "🔄 Yopishqoq xayollar\n\n"
@@ -203,7 +276,6 @@ async def yopishqoq_xayollar_info(update: Update, context: ContextTypes.DEFAULT_
         "❗ Eslatma: Sizda bu muammo bilan birga tibbiy tekshiruvlarda hech narsa aniqlanmasligi kerak!",
         reply_markup=muammo_keyboard()
     )
-
 
 async def uyqu_info(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(
@@ -219,7 +291,6 @@ async def uyqu_info(update: Update, context: ContextTypes.DEFAULT_TYPE):
         reply_markup=muammo_keyboard()
     )
 
-
 async def yurak_info(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(
         "❤️ Yurak tez urib ketishi\n\n"
@@ -233,7 +304,6 @@ async def yurak_info(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "❗ Eslatma: Sizda bu muammo bilan birga tibbiy tekshiruvlarda hech narsa aniqlanmasligi kerak!",
         reply_markup=muammo_keyboard()
     )
-
 
 async def nafas_info(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(
@@ -249,7 +319,6 @@ async def nafas_info(update: Update, context: ContextTypes.DEFAULT_TYPE):
         reply_markup=muammo_keyboard()
     )
 
-
 async def tomoqqa_info(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(
         "🫢 Tomoqqa tiqilish hissi\n\n"
@@ -263,34 +332,31 @@ async def tomoqqa_info(update: Update, context: ContextTypes.DEFAULT_TYPE):
         reply_markup=muammo_keyboard()
     )
 
-
 async def bosh_ogriq_info(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(
         "🤕 Bosh og'rig'i\n\n"
         "Bosh og'rig'i stress, xavotir va ruhiy zo'riqish bilan kuchayishi mumkin.\n\n"
         "✅ Belgilari:\n"
         "• Boshda bosim hissi\n"
-        "• Peshona yoki ensa og'rig'i o'g'riqlar ko'pincha ko'chib yuradi\n"
+        "• Peshona yoki ensa og'rig'i — og'riqlar ko'pincha ko'chib yuradi\n"
         "• Stress bilan og'riqning kuchayishi\n\n"
         "📌 Ruhiy holat barqarorlashsa, boshdagi og'riqlar ham kamayishi mumkin.\n\n"
         "❗ Eslatma: Sizda bu muammo bilan birga tibbiy tekshiruvlarda hech narsa aniqlanmasligi kerak!",
         reply_markup=muammo_keyboard()
     )
 
-
 async def bosh_aylanish_info(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(
         "💫 Bosh aylanishi\n\n"
         "Bosh aylanishi ba'zan xavotir, qo'rquv va ichki zo'riqish bilan birga kuzatiladi.\n\n"
         "✅ Belgilari:\n"
-        "• bosh aylangandek bo'lishi\n"
+        "• Bosh aylangandek bo'lishi\n"
         "• Muvozanat buzilgandek tuyulishi\n"
         "• Qo'rquv bilan kuchayishi\n\n"
         "📌 Organik sabablar bo'lmasa, bu holat psixosomatik bo'lishi mumkin Ko'pincha Nevroz yoki Depressiyada kuzatiladi.\n\n"
         "❗ Eslatma: Sizda bu muammo bilan birga tibbiy tekshiruvlarda hech narsa aniqlanmasligi kerak!",
         reply_markup=muammo_keyboard()
     )
-
 
 async def ich_info(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(
@@ -305,7 +371,6 @@ async def ich_info(update: Update, context: ContextTypes.DEFAULT_TYPE):
         reply_markup=muammo_keyboard()
     )
 
-
 async def peshob_info(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(
         "🚻 Peshob qilish hissi\n\n"
@@ -319,7 +384,6 @@ async def peshob_info(update: Update, context: ContextTypes.DEFAULT_TYPE):
         reply_markup=muammo_keyboard()
     )
 
-
 async def qaltirash_info(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(
         "🫨 Tanadagi qaltirashlar\n\n"
@@ -332,7 +396,6 @@ async def qaltirash_info(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "❗ Eslatma: Sizda bu muammo bilan birga tibbiy tekshiruvlarda hech narsa aniqlanmasligi kerak!",
         reply_markup=muammo_keyboard()
     )
-
 
 async def vazn_info(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(
@@ -348,39 +411,6 @@ async def vazn_info(update: Update, context: ContextTypes.DEFAULT_TYPE):
         reply_markup=muammo_keyboard()
     )
 
-
-async def narxlar(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text("Narxlar bo'limi hozircha to'ldirilmoqda.")
-
-
-async def manzil(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    manzil_keyboard = ReplyKeyboardMarkup(
-        [
-            ["ALBATTA BORAMAN"],
-            ["⬅️ Ortga"]
-        ],
-        resize_keyboard=True
-    )
-
-    await update.message.reply_text(
-        "⚠️ DIQQAT!\n\n"
-        "QABULGA YOZILIB KELISHINGIZ SHART, CHUNKI BU ODDIY DORI YOZIB BERISH EMAS, "
-        "PSIXOTERAPIYA HISOBLANADI!\n\n"
-        "YOZILMASDAN KELSANGIZ, QABULGA KIRMASDAN KETISHINGIZ MUMKIN.\n\n"
-        "AGAR KELISHINGIZ ANIQ BO'LMASA, ILTIMOS, SIZNING O'RNINGIZGA BOSHQA INSON KELISHI MUMKIN. "
-        "SHUNING UCHUN SHUNCHAKI YOLG'ONDAN 'KELAMAN' DEB O'ZINGIZNING, DOKTORNING VA BOSHQALARNING "
-        "VAQTINI O'G'IRLAMANG!",
-        reply_markup=manzil_keyboard
-
-    )
-async def manzilni_korsat(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text(
-        "🏥 SOSH MEDICAL klinikasi\n\n"
-        "📍 Manzil: Yunusobod tumani, 13-mavze, Yangishahar ko'chasi 64a uy\n\n"
-        "🗺 LOKATSIYA:\n"
-        "https://yandex.com/navi/?whatshere%5Bzoom%5D=18&whatshere%5Bpoint%5D=69.296029%2C41.364923&lang=uz&from=navi"
-    )
-
 async def boglanish(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(
         "📞 Bog'lanish ma'lumotlari\n\n"
@@ -392,43 +422,30 @@ async def boglanish(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "https://youtube.com/@doktor_ergashev?si=s939zn1cW_N7BLu-"
     )
 
-
 async def savollar(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(
         "❓ Ko'p beriladigan savollar\n\n"
-        
         "1️⃣ Psixoterapiya nima?\n"
         "Psixoterapiya — bu ruhiy muammolarni suhbat orqali davolash usuli.\n\n"
-        
         "2️⃣ Bir marta kelish yetarlimi?\n"
         "Ayrim insonlarda bitta konsultatsiya yetarli bo'lishi mumkin, lekin ko'pchilikda bir necha seans yoki 10 kunlik onlayn kurs samaraliroq bo'ladi.\n\n"
-        
         "3️⃣ Dorilar majburiymi?\n"
-        "Yo‘q, har doim ham emas. Lekin ko‘p hollarda (taxminan 70–80%) holatga qarab yoziladi.\n\n"
-        
-        "4️⃣ Qancha vaqtda natija bo‘ladi?\n"
-        "Bu sizning holatingizga bog‘liq. Ba’zida tez (1 oy ichida), lekin odatda 2–3 oyda natija bo‘ladi. Og‘ir holatlarda undan ham ko‘proq vaqt talab qilinishi mumkin.\n\n"
-        
+        "Yo'q, har doim ham emas. Lekin ko'p hollarda (taxminan 70–80%) holatga qarab yoziladi.\n\n"
+        "4️⃣ Qancha vaqtda natija bo'ladi?\n"
+        "Bu sizning holatingizga bog'liq. Ba'zida tez (1 oy ichida), lekin odatda 2–3 oyda natija bo'ladi.\n\n"
         "5️⃣ Onlayn davolanish ham samaralimi?\n"
-        "Ha, to‘g‘ri olib borilsa onlayn psixoterapiya ham juda yaxshi natija beradi.\n\n"
-
+        "Ha, to'g'ri olib borilsa onlayn psixoterapiya ham juda yaxshi natija beradi.\n\n"
         "6️⃣ Bu sehr yoki jin tegish kasalligi emasmi?\n"
-        "Yo‘q! Nevroz yoki depressiya bu tibbiy-psixologik holat hisoblanadi.\n\n"
-
-        "7️⃣ Bu kasallikdan butunlay sog‘ayish mumkinmi?\n"
-        "Ha, ko‘p hollarda (taxminan 70%) insonlar to‘liq sog‘ayadi. Qolganlarda ayrim belgilar qolishi mumkin, lekin hayotga jiddiy ta’sir qilmaydi.\n\n"
-
-        "8️⃣ Bu kasallikdan o‘lib qolish yoki jinni bo‘lib qolish mumkinmi?\n"
-        "Yo‘q, xavotir olmang. Bu holat hayot uchun xavfli emas va insonni jinni qilib qo‘ymaydi.\n\n"
-
+        "Yo'q! Nevroz yoki depressiya bu tibbiy-psixologik holat hisoblanadi.\n\n"
+        "7️⃣ Bu kasallikdan butunlay sog'ayish mumkinmi?\n"
+        "Ha, ko'p hollarda (taxminan 70%) insonlar to'liq sog'ayadi.\n\n"
+        "8️⃣ Bu kasallikdan o'lib qolish yoki jinni bo'lib qolish mumkinmi?\n"
+        "Yo'q, xavotir olmang. Bu holat hayot uchun xavfli emas va insonni jinni qilib qo'ymaydi.\n\n"
         "9️⃣ Bu shizofreniya emasmi?\n"
-        "Yo‘q. Shizofreniya jiddiy psixik kasallik bo‘lib, u bilan psixiatrlar shug‘ullanadi. Shizofreniyada inson o'zini ko'pincha kasal hisoblamaydi.\n\n"
-
+        "Yo'q. Shizofreniya jiddiy psixik kasallik bo'lib, u bilan psixiatrlar shug'ullanadi.\n\n"
         "🔟 Doktor Ergashev kim?\n"
-        "Doktor Ergashev — Toshkent Tibbiyot Akademiyasi (hozirgi Toshkent Tibbiyot Universiteti) "
-        "Tibbiy psixologiya yo‘nalishi magistr bitiruvchisi. 2023-yildan beri faoliyat yuritadi va "
-        "3000 dan ortiq bemorlar bilan ishlab, nevroz va depressiv holatlarni davolab kelmoqda.\n\n"
-        
+        "Doktor Ergashev — Toshkent Tibbiyot Akademiyasi Tibbiy psixologiya yo'nalishi magistr bitiruvchisi. "
+        "2023-yildan beri faoliyat yuritadi va 3000 dan ortiq bemorlar bilan ishlab kelmoqda."
     )
 
 async def qabul(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -438,10 +455,228 @@ async def qabul(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "Iltimos, ism va familiyangizni yozing."
     )
 
+# ===================== TO'LOV TIZIMI =====================
+
+async def guruhga_kirish(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    user = update.effective_user
+    sub = get_subscriber(user.id)
+
+    if sub and sub[5] == 1:
+        await update.message.reply_text(
+            f"✅ Siz allaqachon faol a'zo siz!\n\n"
+            f"📅 Obuna tugash sanasi: {sub[4]}\n\n"
+            f"🔗 Guruh linki:\n{GURUH_LINK}",
+            reply_markup=main_keyboard
+        )
+        return
+
+    await update.message.reply_text(
+        "🔐 Yopiq guruh haqida\n\n"
+        "Bu guruhda inson ruhiyati, ruhiy buzilish va kasalliklar haqidagi "
+        "qimmatli ma'lumotlarni atigi 100 ming so'm evaziga oylik obuna bo'lish "
+        "orqali o'rganib borasiz.\n\n"
+        "Obuna bo'lish uchun quyidagi karta raqamiga to'lov qiling:"
+    )
+
+    await update.message.reply_text(
+        f"💳 To'lov ma'lumotlari\n\n"
+        f"💰 Narxi: {NARX} / oy\n\n"
+        f"Karta raqami:\n"
+        f"`{KARTA_RAQAM}`\n"
+        f"👤 Karta egasi: {KARTA_EGASI}\n\n"
+        f"📸 To'lovni amalga oshirgach, to'lov chekining rasmini (screenshot) "
+        f"shu chatga yuboring.\n"
+        f"Admin tekshirib, 5–10 daqiqa ichida guruh linkini yuboradi.",
+        parse_mode="Markdown",
+        reply_markup=tolov_keyboard
+    )
+    context.user_data["holat"] = "tolov_kutish"
+
+async def handle_payment_media(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Foydalanuvchi to'lov cheki rasmini yuborganda"""
+    if context.user_data.get("holat") != "tolov_kutish":
+        return
+
+    user = update.effective_user
+    username_str = f"@{user.username}" if user.username else "yo'q"
+
+    caption = (
+        f"💳 Yangi to'lov so'rovi!\n\n"
+        f"👤 Ism: {user.full_name}\n"
+        f"🆔 ID: {user.id}\n"
+        f"📱 Username: {username_str}\n\n"
+        f"✅ Tasdiqlash: /tasdiqlash {user.id}\n"
+        f"❌ Rad etish: /rad {user.id}"
+    )
+
+    if update.message.photo:
+        await context.bot.send_photo(
+            chat_id=ADMIN_ID,
+            photo=update.message.photo[-1].file_id,
+            caption=caption
+        )
+    elif update.message.document:
+        await context.bot.send_document(
+            chat_id=ADMIN_ID,
+            document=update.message.document.file_id,
+            caption=caption
+        )
+
+    context.user_data["holat"] = "tolov_yuborildi"
+    await update.message.reply_text(
+        "✅ To'lov chekingiz adminga yuborildi.\n"
+        "5–10 daqiqa ichida guruh linki yuboriladi. Sabr biling! 🙏",
+        reply_markup=main_keyboard
+    )
+
+# ===================== ADMIN KOMANDALAR =====================
+
+async def tasdiqlash(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """To'lovni tasdiqlash: /tasdiqlash <user_id>"""
+    if update.effective_user.id != ADMIN_ID:
+        return
+
+    if not context.args:
+        await update.message.reply_text("Foydalanish: /tasdiqlash <user_id>")
+        return
+
+    try:
+        user_id = int(context.args[0])
+    except ValueError:
+        await update.message.reply_text("Noto'g'ri user_id")
+        return
+
+    try:
+        chat = await context.bot.get_chat(user_id)
+        full_name = chat.full_name
+        username = chat.username
+    except Exception:
+        full_name = "Noma'lum"
+        username = None
+
+    end_date = add_subscriber(user_id, username, full_name)
+
+    try:
+        await context.bot.send_message(
+            chat_id=user_id,
+            text=(
+                f"✅ To'lovingiz tasdiqlandi!\n\n"
+                f"🎉 Tabriklaymiz! Siz yopiq guruhga a'zo bo'ldingiz.\n\n"
+                f"📅 Obuna muddati: 1 oy ({end_date} gacha)\n\n"
+                f"🔗 Guruh linki:\n{GURUH_LINK}\n\n"
+                f"Muddat tugagach, qayta to'lov qilib obunani yangilang."
+            )
+        )
+        await update.message.reply_text(
+            f"✅ {full_name} (ID: {user_id}) tasdiqlandi. Guruh linki yuborildi."
+        )
+    except Exception as e:
+        await update.message.reply_text(f"Xatolik: {e}")
+
+async def rad_etish(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """To'lovni rad etish: /rad <user_id>"""
+    if update.effective_user.id != ADMIN_ID:
+        return
+
+    if not context.args:
+        await update.message.reply_text("Foydalanish: /rad <user_id>")
+        return
+
+    try:
+        user_id = int(context.args[0])
+    except ValueError:
+        await update.message.reply_text("Noto'g'ri user_id")
+        return
+
+    try:
+        await context.bot.send_message(
+            chat_id=user_id,
+            text=(
+                "❌ Kechirasiz, to'lovingiz tasdiqlanmadi.\n\n"
+                "Muammo bo'lsa, admin bilan bog'laning yoki "
+                "qayta to'lov qilib chek yuboring."
+            )
+        )
+        await update.message.reply_text(f"❌ User {user_id} rad etildi.")
+    except Exception as e:
+        await update.message.reply_text(f"Xatolik: {e}")
+
+async def aʼzolar(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """/aʼzolar — barcha faol obunachlar ro'yxati"""
+    if update.effective_user.id != ADMIN_ID:
+        return
+
+    rows = get_all_active()
+    if not rows:
+        await update.message.reply_text("Hozircha faol a'zolar yo'q.")
+        return
+
+    text = f"👥 Faol obunachlar: {len(rows)} ta\n\n"
+    for row in rows:
+        user_id, username, full_name, start_date, end_date, active = row
+        text += f"👤 {full_name}\n"
+        text += f"🆔 {user_id}"
+        if username:
+            text += f" | @{username}"
+        text += f"\n📅 {start_date} → {end_date}\n\n"
+
+    await update.message.reply_text(text)
+
+async def guruh_id_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Guruhda /guruh_id deb yozing — bot guruh ID ni yuboradi"""
+    chat = update.effective_chat
+    await update.message.reply_text(
+        f"Bu guruhning ID si:\n<code>{chat.id}</code>\n\n"
+        f"Buni bot.py dagi GURUH_ID ga qo'ying.",
+        parse_mode="HTML"
+    )
+
+# ===================== KUNLIK TEKSHIRUV =====================
+
+async def check_expired_subscriptions(context: ContextTypes.DEFAULT_TYPE):
+    """Har kuni ishga tushadi — muddati o'tgan a'zolarni chiqaradi"""
+    expired_rows = get_expired()
+
+    for row in expired_rows:
+        user_id, username, full_name, start_date, end_date, active = row
+
+        # Guruhdan chiqarish
+        if GURUH_ID:
+            try:
+                await context.bot.ban_chat_member(chat_id=GURUH_ID, user_id=user_id)
+                # Unban — keyinchalik qayta kira olishi uchun
+                await context.bot.unban_chat_member(chat_id=GURUH_ID, user_id=user_id)
+            except Exception as e:
+                logging.error(f"Kick error ({user_id}): {e}")
+
+        # Foydalanuvchiga xabar
+        try:
+            await context.bot.send_message(
+                chat_id=user_id,
+                text=(
+                    "⏰ Obuna muddatingiz tugadi!\n\n"
+                    "Guruhdan chiqarildingiz.\n\n"
+                    "Qayta obuna bo'lish uchun:\n"
+                    "👉 /start → 💳 Yopiq guruhga kirish"
+                )
+            )
+        except Exception as e:
+            logging.error(f"Notify error ({user_id}): {e}")
+
+        deactivate(user_id)
+
+        # Adminga xabar
+        await context.bot.send_message(
+            chat_id=ADMIN_ID,
+            text=f"⏰ Obuna tugadi: {full_name} (ID: {user_id}) guruhdan chiqarildi."
+        )
+
+# ===================== MATN HANDLERI =====================
 
 async def handle_buttons(update: Update, context: ContextTypes.DEFAULT_TYPE):
     text = update.message.text
 
+    # Qabul yozilish holatlari
     if context.user_data.get("holat") == "ism":
         context.user_data["ism"] = text
         context.user_data["holat"] = "telefon"
@@ -457,83 +692,122 @@ async def handle_buttons(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if context.user_data.get("holat") == "muammo":
         ism = context.user_data.get("ism")
         telefon = context.user_data.get("telefon")
-        muammo = text
         context.user_data["holat"] = None
-
         await update.message.reply_text(
-            "✅ So'rovingiz qabul qilindi, tez orada siz bilan bog'lanamiz!"
+            "✅ So'rovingiz qabul qilindi, tez orada siz bilan bog'lanamiz!",
+            reply_markup=main_keyboard
         )
-
         await context.bot.send_message(
             chat_id=ADMIN_ID,
-            text=f"📥 Yangi qabul:\n\n👤 {ism}\n📞 {telefon}\n💬 {muammo}"
+            text=f"📥 Yangi qabul:\n\n👤 {ism}\n📞 {telefon}\n💬 {text}"
         )
         return
 
-    if text == "Xizmatlar":
-        await xizmatlar(update, context)
-    elif text == "Muammoyingiz nimada":
-        await muammolar(update, context)
-    elif text == "Bog'lanish":
-        await boglanish(update, context)
-    elif text == "Ko'p beriladigan savollar":
-    	await savollar(update, context)
-    elif text == "Qabulga yozilish":
-        await qabul(update, context)
-    elif text == "🧠 Individual suhbat":
-        await individual(update, context)
-    elif text == "🌐 Onlayn konsultatsiya":
-        await onlayn(update, context)
-    elif text == "📚 10 kunlik kurs":
-        await kurs(update, context)
-    elif text == "🎥 Nevroz videolari":
-        await videolar(update, context)
-    elif text == "🟢 Qabulga yozilish":
-        await qabul(update, context)
-    elif text == "Xavotir":
-        await xavotir_info(update, context)
-    elif text == "Vahima xuruji":
-        await vahima_info(update, context)
-    elif text == "Tushkunlik":
-        await tushkunlik_info(update, context)
-    elif text == "Yopishqoq xayollar":
-        await yopishqoq_xayollar_info(update, context)
-    elif text == "Uyqu muammolari":
-        await uyqu_info(update, context)
-    elif text == "Yurak tez urib ketishi":
-        await yurak_info(update, context)
-    elif text == "Nafas qisishi":
-        await nafas_info(update, context)
-    elif text == "Tomoqqa tiqilish hissi":
-        await tomoqqa_info(update, context)
-    elif text == "Bosh og'rig'i":
-        await bosh_ogriq_info(update, context)
-    elif text == "Bosh aylanishi":
-        await bosh_aylanish_info(update, context)
-    elif text == "Ich kelishidagi muammolar":
-        await ich_info(update, context)
-    elif text == "Peshob qilish hissi":
-        await peshob_info(update, context)
-    elif text == "Tanadagi qaltirashlar":
-        await qaltirash_info(update, context)
-    elif text == "Ozib ketish yoki semirish":
-        await vazn_info(update, context)
-    elif text == "⬅️ Ortga":
-        await start(update, context)
-    else:
-        await update.message.reply_text("Kerakli bo'limni tanlang.")
+    # Asosiy tugmalar
+    handlers = {
+        "Xizmatlar": xizmatlar,
+        "Muammoyingiz nimada": muammolar,
+        "Bog'lanish": boglanish,
+        "Ko'p beriladigan savollar": savollar,
+        "Qabulga yozilish": qabul,
+        "🟢 Qabulga yozilish": qabul,
+        "💳 Yopiq guruhga kirish": guruhga_kirish,
+        "✅ To'lovni tasdiqlayman": _tolov_tasdiqlash_eslatma,
+        "🧠 Individual suhbat": individual,
+        "🌐 Onlayn konsultatsiya": onlayn,
+        "📚 10 kunlik kurs": kurs,
+        "🎥 Nevroz videolari": videolar,
+        "Xavotir": xavotir_info,
+        "Vahima xuruji": vahima_info,
+        "Tushkunlik": tushkunlik_info,
+        "Yopishqoq xayollar": yopishqoq_xayollar_info,
+        "Uyqu muammolari": uyqu_info,
+        "Yurak tez urib ketishi": yurak_info,
+        "Nafas qisishi": nafas_info,
+        "Tomoqqa tiqilish hissi": tomoqqa_info,
+        "Bosh og'rig'i": bosh_ogriq_info,
+        "Bosh aylanishi": bosh_aylanish_info,
+        "Ich kelishidagi muammolar": ich_info,
+        "Peshob qilish hissi": peshob_info,
+        "Tanadagi qaltirashlar": qaltirash_info,
+        "Ozib ketish yoki semirish": vazn_info,
+        "ALBATTA BORAMAN": manzilni_korsat,
+        "⬅️ Ortga": start,
+    }
 
+    if text in handlers:
+        await handlers[text](update, context)
+    else:
+        await update.message.reply_text("Kerakli bo'limni tanlang.", reply_markup=main_keyboard)
+
+async def _tolov_tasdiqlash_eslatma(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Foydalanuvchi 'To'lovni tasdiqlayman' bosganida"""
+    if context.user_data.get("holat") == "tolov_kutish":
+        await update.message.reply_text(
+            "📸 Iltimos, to'lov chekining rasmini (screenshot) yuboring.\n"
+            "Rasm yuborilgach, admin tekshiradi va guruh linki yuboriladi."
+        )
+    else:
+        await guruhga_kirish(update, context)
+
+async def manzil(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    manzil_kb = ReplyKeyboardMarkup(
+        [["ALBATTA BORAMAN"], ["⬅️ Ortga"]],
+        resize_keyboard=True
+    )
+    await update.message.reply_text(
+        "⚠️ DIQQAT!\n\n"
+        "QABULGA YOZILIB KELISHINGIZ SHART, CHUNKI BU ODDIY DORI YOZIB BERISH EMAS, "
+        "PSIXOTERAPIYA HISOBLANADI!\n\n"
+        "YOZILMASDAN KELSANGIZ, QABULGA KIRMASDAN KETISHINGIZ MUMKIN.\n\n"
+        "AGAR KELISHINGIZ ANIQ BO'LMASA, ILTIMOS, SIZNING O'RNINGIZGA BOSHQA INSON KELISHI MUMKIN. "
+        "SHUNING UCHUN SHUNCHAKI YOLG'ONDAN 'KELAMAN' DEB O'ZINGIZNING, DOKTORNING VA BOSHQALARNING "
+        "VAQTINI O'G'IRLAMANG!",
+        reply_markup=manzil_kb
+    )
+
+async def manzilni_korsat(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await update.message.reply_text(
+        "🏥 SOSH MEDICAL klinikasi\n\n"
+        "📍 Manzil: Yunusobod tumani, 13-mavze, Yangishahar ko'chasi 64a uy\n\n"
+        "🗺 LOKATSIYA:\n"
+        "https://yandex.com/navi/?whatshere%5Bzoom%5D=18&whatshere%5Bpoint%5D=69.296029%2C41.364923&lang=uz&from=navi"
+    )
+
+# ===================== MAIN =====================
 
 def main():
+    init_db()
+
     app = ApplicationBuilder().token(TOKEN).build()
 
+    # Asosiy komandalar
     app.add_handler(CommandHandler("start", start))
     app.add_handler(CommandHandler("xizmatlar", xizmatlar))
     app.add_handler(CommandHandler("boglanish", boglanish))
     app.add_handler(CommandHandler("savollar", savollar))
     app.add_handler(CommandHandler("qabul", qabul))
+    app.add_handler(CommandHandler("guruh_id", guruh_id_cmd))
 
+    # Admin komandalar
+    app.add_handler(CommandHandler("tasdiqlash", tasdiqlash))
+    app.add_handler(CommandHandler("rad", rad_etish))
+    app.add_handler(CommandHandler("aʼzolar", aʼzolar))
+
+    # Rasm/fayl yuborish (to'lov cheki)
+    app.add_handler(MessageHandler(
+        filters.PHOTO | filters.Document.ALL,
+        handle_payment_media
+    ))
+
+    # Matn xabarlari
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_buttons))
+
+    # Kunlik tekshiruv — har kuni soat 09:00 da
+    app.job_queue.run_daily(
+        check_expired_subscriptions,
+        time=datetime.time(hour=9, minute=0)
+    )
 
     print("Bot ishga tushdi...")
     app.run_polling()
