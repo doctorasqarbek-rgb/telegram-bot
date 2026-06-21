@@ -494,7 +494,9 @@ async def guruhga_kirish(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def handle_payment_media(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Foydalanuvchi to'lov cheki rasmini yuborganda"""
-    if context.user_data.get("holat") != "tolov_kutish":
+    # Holat yo'q bo'lsa ham rasmni qabul qilamiz (bot restart bo'lgan holat)
+    holat = context.user_data.get("holat")
+    if holat not in ("tolov_kutish", None, "tolov_yuborildi"):
         return
 
     user = update.effective_user
@@ -686,11 +688,12 @@ async def azolar(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(text)
 
 async def guruh_id_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Guruhda /guruh_id deb yozing — bot guruh ID ni yuboradi"""
+    """Guruhda /guruh_id deb yozing — faqat admin ko'radi"""
+    if update.effective_user.id != ADMIN_ID:
+        return
     chat = update.effective_chat
     await update.message.reply_text(
-        f"Bu guruhning ID si:\n<code>{chat.id}</code>\n\n"
-        f"Buni bot.py dagi GURUH_ID ga qo'ying.",
+        f"Bu guruhning ID si:\n<code>{chat.id}</code>",
         parse_mode="HTML"
     )
 
