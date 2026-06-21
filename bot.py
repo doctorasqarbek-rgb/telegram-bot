@@ -601,8 +601,8 @@ async def rad_etish(update: Update, context: ContextTypes.DEFAULT_TYPE):
     except Exception as e:
         await update.message.reply_text(f"Xatolik: {e}")
 
-async def aʼzolar(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """/aʼzolar — barcha faol obunachlar ro'yxati"""
+async def azolar(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """/azolar — barcha faol obunachlar ro'yxati"""
     if update.effective_user.id != ADMIN_ID:
         return
 
@@ -792,7 +792,7 @@ def main():
     # Admin komandalar
     app.add_handler(CommandHandler("tasdiqlash", tasdiqlash))
     app.add_handler(CommandHandler("rad", rad_etish))
-    app.add_handler(CommandHandler("aʼzolar", aʼzolar))
+    app.add_handler(CommandHandler("azolar", azolar))
 
     # Rasm/fayl yuborish (to'lov cheki)
     app.add_handler(MessageHandler(
