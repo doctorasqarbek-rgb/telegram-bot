@@ -19,7 +19,7 @@ NARX = "100 000 so'm"
 GURUH_LINK = "https://t.me/+PujFAoCdY85kMDQy"
 
 # Guruh ID — botni guruhga admin qilib qo'shing va /guruh_id komandasi yuboring
-GURUH_ID = None  # Masalan: -1001234567890
+GURUH_ID = -1004397770642
 
 # ===================== DATABASE =====================
 
