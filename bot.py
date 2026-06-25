@@ -447,33 +447,73 @@ async def callback_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if query.from_user.id != ADMIN_ID:
         return
     data = query.data
-    if data.startswith("t:"):
-        user_id = int(data.split(":")[1])
+    try:
+        if data.startswith("t:"):
+            user_id = int(data.split(":")[1])
+            # Ism olish
+            try:
+                chat = await context.bot.get_chat(user_id)
+                full_name = chat.full_name or "Noma'lum"
+                username = chat.username
+            except Exception:
+                full_name = "Noma'lum"; username = None
+            # DB ga yozish
+            end_date = add_subscriber(user_id, username, full_name)
+            # Guruh linki olish
+            try:
+                invite = await context.bot.create_chat_invite_link(
+                    chat_id=GURUH_ID, member_limit=1, name=str(full_name)[:30])
+                link = invite.invite_link
+            except Exception as e:
+                logging.warning("Invite link error: " + str(e))
+                link = GURUH_LINK
+            # Foydalanuvchiga xabar yuborish
+            try:
+                await context.bot.send_message(
+                    chat_id=user_id,
+                    text="✅ To'lovingiz tasdiqlandi!\n\nTabriklaymiz! 🎉\n\n"
+                         "Obuna muddati: 1 oy (" + str(end_date) + " gacha)\n\n"
+                         "🔗 Guruh linki (faqat siz uchun, 1 martalik):\n" + link +
+                         "\n\nMuddat tugagach, qayta to'lov qiling.")
+            except Exception as e:
+                logging.error("Send to user error: " + str(e))
+                await context.bot.send_message(
+                    chat_id=ADMIN_ID,
+                    text="⚠️ Foydalanuvchiga xabar yuborilmadi!\nUser ID: " + str(user_id) +
+                         "\nSabab: " + str(e) + "\n\nGuruh linki: " + link)
+            # Adminning xabarini yangilash
+            try:
+                await query.edit_message_caption(
+                    caption="✅ Tasdiqlandi: " + str(full_name) + "\n📅 " + str(end_date) + " gacha")
+            except Exception:
+                pass
+            await context.bot.send_message(
+                chat_id=ADMIN_ID,
+                text="✅ Tasdiqlandi!\n👤 " + str(full_name) + "\n🆔 " + str(user_id) +
+                     "\n📅 " + str(end_date) + " gacha\n🔗 " + link)
+
+        elif data.startswith("r:"):
+            user_id = int(data.split(":")[1])
+            try:
+                await context.bot.send_message(
+                    chat_id=user_id,
+                    text="❌ Kechirasiz, to'lovingiz tasdiqlanmadi.\nQayta to'lov qilib chek yuboring.")
+            except Exception as e:
+                logging.error("Rad send error: " + str(e))
+            try:
+                await query.edit_message_caption(caption="❌ Rad etildi (ID: " + str(user_id) + ")")
+            except Exception:
+                pass
+            await context.bot.send_message(
+                chat_id=ADMIN_ID, text="❌ Rad etildi. User ID: " + str(user_id))
+
+    except Exception as e:
+        logging.error("Callback error: " + str(e))
         try:
-            chat = await context.bot.get_chat(user_id)
-            full_name = chat.full_name; username = chat.username
+            await context.bot.send_message(
+                chat_id=ADMIN_ID, text="🔴 Xatolik yuz berdi:\n" + str(e))
         except Exception:
-            full_name = "Noma'lum"; username = None
-        end_date = add_subscriber(user_id, username, full_name)
-        try:
-            invite = await context.bot.create_chat_invite_link(chat_id=GURUH_ID, member_limit=1, name=str(full_name)[:30])
-            link = invite.invite_link
-        except Exception:
-            link = GURUH_LINK
-        try:
-            await context.bot.send_message(chat_id=user_id, text=
-                "✅ To'lovingiz tasdiqlandi!\n\nTabriklaymiz! 🎉\n\nObuna muddati: 1 oy (" + str(end_date) + " gacha)\n\n"
-                "🔗 Guruh linki (faqat siz uchun, 1 martalik):\n" + link + "\n\nMuddat tugagach, qayta to'lov qiling.")
-            await query.edit_message_caption(caption="✅ Tasdiqlandi: " + str(full_name) + "\n📅 " + str(end_date) + " gacha")
-        except Exception as e:
-            await query.edit_message_caption(caption="⚠️ Xatolik: " + str(e))
-    elif data.startswith("r:"):
-        user_id = int(data.split(":")[1])
-        try:
-            await context.bot.send_message(chat_id=user_id, text="❌ Kechirasiz, to'lovingiz tasdiqlanmadi.\nQayta to'lov qilib chek yuboring.")
-            await query.edit_message_caption(caption="❌ Rad etildi (ID: " + str(user_id) + ")")
-        except Exception as e:
-            await query.edit_message_caption(caption="⚠️ Xatolik: " + str(e))
+            pass
 
 async def tasdiqlash(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update.effective_user.id != ADMIN_ID: return
