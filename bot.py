@@ -23,9 +23,18 @@ def init_db():
 
 def add_subscriber(user_id, username, full_name):
     conn = sqlite3.connect("subscribers.db"); c = conn.cursor()
-    start = datetime.date.today(); end = start + datetime.timedelta(days=30)
+    today = datetime.date.today()
+    # Agar faol obuna bo'lsa, qolgan kunlardan uzaytirish
+    c.execute("SELECT end_date, active FROM subscribers WHERE user_id=?", (user_id,))
+    row = c.fetchone()
+    if row and row[1] == 1:
+        current_end = datetime.date.fromisoformat(row[0])
+        base = current_end if current_end > today else today
+    else:
+        base = today
+    end = base + datetime.timedelta(days=30)
     c.execute("INSERT OR REPLACE INTO subscribers (user_id,username,full_name,start_date,end_date,active) VALUES (?,?,?,?,?,1)",
-              (user_id, username or "", full_name, str(start), str(end)))
+              (user_id, username or "", full_name, str(today), str(end)))
     conn.commit(); conn.close(); return end
 
 def get_subscriber(user_id):
