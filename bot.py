@@ -6,7 +6,7 @@ from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, Con
 
 logging.basicConfig(level=logging.INFO)
 
-TOKEN = "6411235489:AAGBVw5jHOQvlfOnQAUouKsYi0MtDfmJSzY"
+TOKEN = "6411235489:AAFgpTvwVUZ6SN4tmIcBilN-LBRm07--D9o"
 ADMIN_ID = 741361382
 KARTA_RAQAM = "9860 1606 0775 6576"
 KARTA_EGASI = "Sevinch Ergasheva"
