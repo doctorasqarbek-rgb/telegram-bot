@@ -734,6 +734,16 @@ async def handle_buttons(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 def main():
     init_db()
+
+    # DIAGNOSTIKA: joriy papkadagi barcha fayllarni logga chiqaramiz
+    joriy_papka = os.path.dirname(os.path.abspath(__file__))
+    try:
+        fayllar = os.listdir(joriy_papka)
+        logging.info(f"DIAGNOSTIKA - joriy papka: {joriy_papka}")
+        logging.info(f"DIAGNOSTIKA - papkadagi fayllar: {fayllar}")
+    except Exception as e:
+        logging.error(f"DIAGNOSTIKA xatosi: {e}")
+
     app = ApplicationBuilder().token(TOKEN).build()
     app.add_handler(CommandHandler("start", start))
     app.add_handler(CommandHandler("xizmatlar", xizmatlar))
