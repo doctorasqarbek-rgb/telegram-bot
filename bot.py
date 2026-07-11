@@ -453,10 +453,6 @@ async def manzilni_korsat(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 async def guruhga_kirish(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """
-    Yopiq guruhga kirish uchun to'lov ma'lumotlarini yuboradi.
-    Endi ikki usul ko'rsatiladi: 1) Xolis QR-kod  2) Karta raqami
-    """
     user = update.effective_user
     sub = get_subscriber(user.id)
     if sub and sub[5] == 1:
@@ -469,37 +465,44 @@ async def guruhga_kirish(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "🔒 Yopiq guruh haqida\n\n"
         "Bu guruhda inson ruhiyati, ruhiy buzilish va kasalliklar haqidagi "
         "qimmatli ma'lumotlarni atigi 100 ming so'm evaziga oylik obuna bo'lish orqali o'rganib borasiz.\n\n"
-        "Quyida ikkita to'lov usuli mavjud:")
+        "To'lov QR-kod orqali amalga oshiriladi:")
 
-    # 1-usul: Xolis QR-kod orqali to'lash
-    qr_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), XOLIS_QR_FAYL)
-    if os.path.exists(qr_path):
+    mumkin_boigan_yollar = [
+        os.path.join(os.path.dirname(os.path.abspath(__file__)), XOLIS_QR_FAYL),
+        os.path.join(os.getcwd(), XOLIS_QR_FAYL),
+        XOLIS_QR_FAYL,
+    ]
+    qr_path = None
+    for yol in mumkin_boigan_yollar:
+        logging.info(f"QR fayl qidirilmoqda: {yol} -> mavjud: {os.path.exists(yol)}")
+        if os.path.exists(yol):
+            qr_path = yol
+            break
+
+    if qr_path:
         with open(qr_path, "rb") as qr_photo:
             await context.bot.send_photo(
                 chat_id=update.effective_chat.id,
                 photo=qr_photo,
                 caption=(
-                    "📱 1-usul: QR-kod orqali to'lash\n\n"
+                    "📱 QR-kod orqali to'lash\n\n"
                     "Ushbu QR-kodni istalgan bank yoki to'lov ilovasi "
                     "(Payme, Click, biror bank ilovasi va h.k.) orqali skanerlang.\n\n"
+                    "💡 Agar bitta telefon ishlatsangiz: rasmni saqlab, "
+                    "to'lov ilovasidagi QR skaner bo'limida \"Galereyadan tanlash\" "
+                    "orqali yuklashingiz mumkin.\n\n"
                     "💰 To'lanishi kerak summa: " + NARX
                 )
             )
     else:
-        logging.warning(f"QR fayl topilmadi: {qr_path}")
+        logging.warning(f"QR fayl hech qaysi yo'lda topilmadi. Tekshirilgan yo'llar: {mumkin_boigan_yollar}")
 
-    # 2-usul: Karta raqami orqali to'lash
     await update.message.reply_text(
-        "💳 2-usul: Karta orqali to'lash\n\n"
-        "Karta raqami:\n" + KARTA_RAQAM + "\n"
-        "Karta egasi: " + KARTA_EGASI + "\n\n"
-        "💰 Narxi: " + NARX + " / oy\n\n"
-        "❗️ Qaysi usul bilan to'lasangiz ham, to'lov chekining rasmini (yoki QR orqali "
-        "to'lov tasdig'ini) shu chatga yuboring.\n"
+        "❗️ To'lovni amalga oshirgach, to'lov tasdig'i (chek yoki skrinshot) rasmini "
+        "shu chatga yuboring.\n"
         "Admin 5-10 daqiqa ichida guruh linkini yuboradi.",
         reply_markup=tolov_keyboard)
     context.user_data["holat"] = "tolov_kutish"
-
 
 async def handle_payment_media(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.effective_user
