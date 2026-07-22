@@ -11,7 +11,7 @@ logging.basicConfig(level=logging.INFO)
 # DIQQAT: Tokenni shu yerga to'g'ridan-to'g'ri yozmang!
 # Muhit o'zgaruvchisi orqali oling (pastdagi eslatmaga qarang)
 # ==========================================================
-TOKEN = os.environ.get("BOT_TOKEN", "6411235489:AAGXy-lFEx3e1yMRbWsjURD2871zlLOcZ2U")
+TOKEN = os.environ.get("BOT_TOKEN", "6411235489:AAH0-TpbcXH3iIBoHWuZF5riXsmRmz0TE00")
 ADMIN_ID = 741361382
 KARTA_RAQAM = "9860 1606 0775 6576"
 KARTA_EGASI = "Sevinch Ergasheva"
