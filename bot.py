@@ -430,8 +430,38 @@ async def savollar(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 async def qabul(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Avval ogohlantirish, keyin tasdiqlash so'raladi."""
+    await update.message.reply_text(
+        "⚠️ *DIQQAT — O'qib chiqing!*\n\n"
+        "Doktor Nevroz, Depressiya, Fobiya, Uyqusizlik, Xavotir buzilishlari va "
+        "Xarakterdagi muammolar bilan shug'ulladilar.\n\n"
+        "Buning uchun *bemorning o'zi tuzalishni xohlashi* kerak.\n"
+        "❌ Iltimos, bemorni majburlab yoki aldab olib kelmang!\n\n"
+        "─────────────────\n"
+        "Bundan tashqari biz quyidagi kasalliklar bilan *ishlamaymiz:*\n\n"
+        "🚫 Shizofreniya\n"
+        "🚫 Epilepsiya (tutqanoq)\n"
+        "🚫 Parkinson\n"
+        "🚫 Demensiya\n\n"
+        "Agar bemorida bunday holat kuzatilayotgan bo'lsa — "
+        "*Psixiatr yoki Nevropatologga* murojaat qiling.\n\n"
+        "─────────────────\n"
+        "Qabulga yozilishni davom ettirasizmi?",
+        parse_mode="Markdown",
+        reply_markup=ReplyKeyboardMarkup(
+            [["✅ Ha, tushundim — yozilaman"], ["⬅️ Ortga"]],
+            resize_keyboard=True
+        )
+    )
+
+
+async def qabul_boshlash(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Ogohlantirish tasdiqlangandan so'ng so'rovnomani boshlash."""
     context.user_data["holat"] = "ism"
-    await update.message.reply_text("📝 Qabulga yozilish\n\nIltimos, ism va familiyangizni yozing.")
+    await update.message.reply_text(
+        "📝 *Qabulga yozilish*\n\nIltimos, ism va familiyangizni yozing.",
+        parse_mode="Markdown"
+    )
 
 
 async def manzil(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -904,6 +934,7 @@ async def handle_buttons(update: Update, context: ContextTypes.DEFAULT_TYPE):
     elif text == "Bog'lanish": await boglanish(update, context)
     elif text == "Ko'p beriladigan savollar": await savollar(update, context)
     elif text in ("Qabulga yozilish", "🟢 Qabulga yozilish"): await qabul(update, context)
+    elif text == "✅ Ha, tushundim — yozilaman": await qabul_boshlash(update, context)
     elif text == "💳 Yopiq guruhga kirish": await guruhga_kirish(update, context)
     elif text == "✅ To'lovni tasdiqlayman":
         if context.user_data.get("holat") == "tolov_kutish":
