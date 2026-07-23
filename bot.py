@@ -11,13 +11,14 @@ logging.basicConfig(level=logging.INFO)
 # DIQQAT: Tokenni shu yerga to'g'ridan-to'g'ri yozmang!
 # Muhit o'zgaruvchisi orqali oling (pastdagi eslatmaga qarang)
 # ==========================================================
-TOKEN = os.environ.get("BOT_TOKEN", "6411235489:AAH0-TpbcXH3iIBoHWuZF5riXsmRmz0TE00")
+TOKEN = os.environ.get("BOT_TOKEN", "6411235489:AAG3GkyBvLoNSMkC2W9d3UmGyemZVuq3Bts")
 ADMIN_ID = 741361382
 KARTA_RAQAM = "9860 1606 0775 6576"
 KARTA_EGASI = "Sevinch Ergasheva"
 NARX = "100 000 so'm"
 GURUH_LINK = "https://t.me/+PujFAoCdY85kMDQy"
 GURUH_ID = -1004397770642
+VIDEO_QOLLANMA_LINK = "https://t.me/doktor_ergashev_psixoterapevt/756"
 
 # QR-kod rasmi joylashgan fayl nomi (bot.py bilan bir papkada bo'lishi kerak)
 XOLIS_QR_FAYL = "xolis_qr.jpg"
@@ -465,6 +466,7 @@ async def guruhga_kirish(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "🔒 Yopiq guruh haqida\n\n"
         "Bu guruhda inson ruhiyati, ruhiy buzilish va kasalliklar haqidagi "
         "qimmatli ma'lumotlarni atigi 100 ming so'm evaziga oylik obuna bo'lish orqali o'rganib borasiz.\n\n"
+        "🎬 Qanday kirish kerakligi haqida videoqo'llanma:\n" + VIDEO_QOLLANMA_LINK + "\n\n"
         "To'lov QR-kod orqali amalga oshiriladi:")
 
     mumkin_boigan_yollar = [
