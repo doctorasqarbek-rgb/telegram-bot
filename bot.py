@@ -183,10 +183,9 @@ main_keyboard = ReplyKeyboardMarkup([
 ], resize_keyboard=True)
 
 xizmat_keyboard = ReplyKeyboardMarkup([
-    ["🧠 Individual suhbat"],
-    ["🌐 Onlayn konsultatsiya"],
-    ["📚 10 kunlik kurs"],
-    ["🎥 Nevroz videolari"],
+    ["🏥 Jonli qabul"],
+    ["📚 10 kunlik onlayn kurs"],
+    ["🔐 Yopiq kanal"],
     ["⬅️ Ortga"]
 ], resize_keyboard=True)
 
@@ -233,65 +232,46 @@ async def xizmatlar(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text("📋 Kerakli xizmatni tanlang:", reply_markup=xizmat_keyboard)
 
 
-async def individual(update: Update, context: ContextTypes.DEFAULT_TYPE):
+async def jonli_qabul(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(
-        "🧠 Individual psixologik suhbat\n\n"
-        "Bu xizmatda siz bilan jonli formatda individual ishlanadi.\n"
-        "Suhbat davomida holatingiz tahlil qilinadi, muammoning sabablari aniqlanadi, "
-        "sizga mos tavsiyalar beriladi va vaziyatga qarab dorilar ham yozib beriladi.\n\n"
-        "✅ Kimlar uchun:\n"
-        "• Nevroz, xavotir, vahima, tushkunlik holatlari bo'lsa\n"
-        "• Psixologik jonli suhbat xohlovchilar uchun\n"
-        "• Ruhiy zo'riqish, asabiylik bo'lsa\n\n"
-        "⏱ Davomiyligi: 30-60 daqiqa\n"
-        "📍 Format: Jonli qabul\n"
-        "💰 Narxi: 600 ming so'm",
+        "🏥 Jonli qabul\n\n"
+        "Bu guruhli va individual tarzda bo'ladi, ya'ni Doktor Ergashev boshida umumiy "
+        "2-3 soatlik dars o'tib siz va boshqalarga kasallik rivojlanish sababi va tuzalish "
+        "yo'llari usullarini o'rgatadilar.\n\n"
+        "So'ngra bemorlar yakka alohida o'zlari dori yozdirish uchun kirganda 10-15 daqiqada "
+        "o'zlarini qiziqtirgan barcha savollariga individual tarzda javob oladilar.\n\n"
+        "Lekin Doktorni o'zi mavzuni tushuntirish mobaynida sizning 90% foiz savollaringizga "
+        "javob berib bo'ladilar — qolgan uyalgan yoki muhim savolingizni dori yozdirib olish "
+        "mobaynida bemalol berishingiz mumkin.",
         reply_markup=muammo_keyboard())
 
-
-async def onlayn(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text(
-        "🌐 Onlayn individual konsultatsiya\n\n"
-        "Bu xizmat masofadan turib suhbat qilish uchun mo'ljallangan.\n"
-        "Telegram yoki boshqa qulay ilova orqali olib boriladi va vaziyatga qarab dorilar ham yozib beriladi.\n\n"
-        "✅ Kimlar uchun:\n"
-        "• Uzoqda yashaydiganlar\n"
-        "• Vaqti cheklanganlar\n"
-        "• Uy sharoitida maslahat olishni xohlaydiganlar\n\n"
-        "⏱ Davomiyligi: 30-60 daqiqa\n"
-        "📱 Format: Onlayn\n"
-        "💰 Narxi: 500 ming so'm",
-        reply_markup=muammo_keyboard())
 
 
 async def kurs(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(
         "📚 10 kunlik onlayn davolash kursi\n\n"
-        "Bu kurs nevroz, xavotir va depressiya bilan ishlash uchun bosqichma-bosqich tuzilgan.\n"
-        "Unda jonli tarzda tushuntirish, topshiriq va amaliy tavsiyalar beriladi.\n\n"
-        "✅ Kurs ichida:\n"
-        "• Har kungi yangi mavzular\n"
-        "• Dorilar yozib berish\n"
-        "• Amaliy mashqlar\n"
-        "• Mustaqil ishlash uchun tavsiyalar\n\n"
-        "📅 Davomiyligi: 10 kun\n"
-        "📱 Format: Onlayn\n"
-        "💰 Narxi: 1 mln so'm",
+        "Bu onlayn tarzda guruhli tarzda Telegramda bo'ladi.\n\n"
+        "Bunda Doktor 10 kun mobaynida ishtirokchilarga Nevrotik va Depressiv kasalliklarning "
+        "kelib chiqish sabablari, mexanizmlari, xarakter ustida ishlash yo'llari va tuzalish "
+        "yo'llarini o'rgatadilar — va bundan ham tashqari albatta dorilar ham tavsiya qilinadi.\n\n"
+        "Kursda faqat Doktorni o'zlari ko'rinadilar, qolgan ishtirokchilar faqat ovozli tarzda "
+        "Doktor bilan gaplashishlari mumkin bo'ladi. Sababi — har bir bemorning shaxsini sir "
+        "saqlash hisoblanadi.\n\n"
+        "🎁 Bonus sifatida darslik o'zingiz bilan qoladi, ular o'chirib yuborilmaydi.",
         reply_markup=muammo_keyboard())
 
 
-async def videolar(update: Update, context: ContextTypes.DEFAULT_TYPE):
+
+async def yopiq_kanal_xizmat(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(
-        "🎥 Nevroz bo'yicha darslik videolari\n\n"
-        "Bunda nevroz, xavotir va tushkunlikni tushunishga yordam beruvchi videolar to'plami beriladi.\n"
-        "Mustaqil o'rganish uchun qulay va arzon format.\n\n"
-        "✅ Nimalarni o'rganasiz:\n"
-        "• Nevroz va depressiya nima ekanini\n"
-        "• Belgilarini\n"
-        "• Rivojlanishini\n"
-        "• Undan qutulish yo'llarini\n\n"
-        "📹 Format: Video darslar\n"
-        "💰 Narxi: 480 ming so'm",
+        "🔐 Yopiq kanal\n\n"
+        "Bu guruhda inson ruhiyati, ruhiy buzilish va kasalliklar haqidagi qimmatli "
+        "ma'lumotlarni atigi 100 ming so'm evaziga oylik obuna bo'lish orqali o'rganib borasiz.\n\n"
+        "Yopiq guruhda inson ruhiyati, kasalliklar turlari, qanday chiqish yo'llari haqida "
+        "qimmatli ma'lumotlar berib boriladi.\n\n"
+        "Bundan tashqari yangi kitob tahlili, ovozli chatlar kabi yangi loyihalar qo'shilishi "
+        "kutilmoqda — va bularning barchasi atigi *100 MING SO'M*!",
+        parse_mode="Markdown",
         reply_markup=muammo_keyboard())
 
 
@@ -930,10 +910,9 @@ async def handle_buttons(update: Update, context: ContextTypes.DEFAULT_TYPE):
             await update.message.reply_text("📸 To'lov chekining rasmini yuboring.")
         else:
             await guruhga_kirish(update, context)
-    elif text == "🧠 Individual suhbat": await individual(update, context)
-    elif text == "🌐 Onlayn konsultatsiya": await onlayn(update, context)
-    elif text == "📚 10 kunlik kurs": await kurs(update, context)
-    elif text == "🎥 Nevroz videolari": await videolar(update, context)
+    elif text == "🏥 Jonli qabul": await jonli_qabul(update, context)
+    elif text == "📚 10 kunlik onlayn kurs": await kurs(update, context)
+    elif text == "🔐 Yopiq kanal": await yopiq_kanal_xizmat(update, context)
     elif text == "Xavotir": await xavotir_info(update, context)
     elif text == "Vahima xuruji": await vahima_info(update, context)
     elif text == "Tushkunlik": await tushkunlik_info(update, context)
