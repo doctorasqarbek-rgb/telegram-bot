@@ -26,6 +26,35 @@ def init_db():
     c.execute("""CREATE TABLE IF NOT EXISTS subscribers (
         user_id INTEGER PRIMARY KEY, username TEXT, full_name TEXT,
         start_date TEXT, end_date TEXT, active INTEGER DEFAULT 1)""")
+    # Har bir foydalanuvchining test o'tkazgan vaqtini saqlaydi
+    c.execute("""CREATE TABLE IF NOT EXISTS test_history (
+        user_id INTEGER,
+        test_turi TEXT,
+        oxirgi_sana TEXT,
+        PRIMARY KEY (user_id, test_turi))""")
+    conn.commit(); conn.close()
+
+
+def can_take_test(user_id, test_turi):
+    """Foydalanuvchi bu haftada testni o'tkazganmi? (True, None) = o'tkazsa bo'ladi."""
+    conn = sqlite3.connect("subscribers.db"); c = conn.cursor()
+    c.execute("SELECT oxirgi_sana FROM test_history WHERE user_id=? AND test_turi=?",
+              (user_id, test_turi))
+    row = c.fetchone(); conn.close()
+    if not row:
+        return True, None
+    oxirgi = datetime.date.fromisoformat(row[0])
+    kunlar = (datetime.date.today() - oxirgi).days
+    if kunlar >= 7:
+        return True, None
+    return False, 7 - kunlar
+
+
+def record_test(user_id, test_turi):
+    """Test o'tkazilgan sanani bazaga yozish."""
+    conn = sqlite3.connect("subscribers.db"); c = conn.cursor()
+    c.execute("INSERT OR REPLACE INTO test_history (user_id, test_turi, oxirgi_sana) VALUES (?,?,?)",
+              (user_id, test_turi, str(datetime.date.today())))
     conn.commit(); conn.close()
 
 
@@ -507,6 +536,16 @@ async def psixologik_testlar(update: Update, context: ContextTypes.DEFAULT_TYPE)
 
 async def start_gad7(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """GAD-7 testini boshlash."""
+    user_id = update.effective_user.id
+    mumkin, qolgan_kun = can_take_test(user_id, "gad7")
+    if not mumkin:
+        await update.message.reply_text(
+            f"⏳ Siz bu testni allaqachon o'tkazgansiz.\n\n"
+            f"GAD-7 testini qayta o'tkazish uchun *{qolgan_kun} kun* kutishingiz kerak.\n\n"
+            f"Test natijalarini kuzatib borish uchun haftada bir marta o'tkazish tavsiya etiladi.",
+            parse_mode="Markdown",
+            reply_markup=test_keyboard)
+        return
     context.user_data["test_turi"] = "gad7"
     context.user_data["test_savol"] = 0
     context.user_data["test_ballar"] = []
@@ -516,6 +555,16 @@ async def start_gad7(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def start_phq9(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """PHQ-9 testini boshlash."""
+    user_id = update.effective_user.id
+    mumkin, qolgan_kun = can_take_test(user_id, "phq9")
+    if not mumkin:
+        await update.message.reply_text(
+            f"⏳ Siz bu testni allaqachon o'tkazgansiz.\n\n"
+            f"PHQ-9 testini qayta o'tkazish uchun *{qolgan_kun} kun* kutishingiz kerak.\n\n"
+            f"Test natijalarini kuzatib borish uchun haftada bir marta o'tkazish tavsiya etiladi.",
+            parse_mode="Markdown",
+            reply_markup=test_keyboard)
+        return
     context.user_data["test_turi"] = "phq9"
     context.user_data["test_savol"] = 0
     context.user_data["test_ballar"] = []
@@ -588,9 +637,10 @@ async def callback_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
         total = len(questions)
 
         if q_index >= total:
-            # Test tugadi — natijani ko'rsatish
+            # Test tugadi — sanani bazaga yozish va natijani ko'rsatish
             jami = sum(context.user_data["test_ballar"])
             context.user_data["holat"] = None
+            record_test(query.from_user.id, test_turi)   # ← haftalik cheklov uchun
 
             if test_turi == "gad7":
                 test_nomi = "GAD-7 – Xavotir testi"
@@ -609,10 +659,14 @@ async def callback_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 f"─────────────────\n"
                 f"⚠️ _Bu natija tibbiy tashxis emas._\n"
                 f"Qiynalayotgan bo'lsangiz, mutaxassis bilan maslahatlashing.\n\n"
-                f"📞 Yordam: +998 88 306 06 95",
+                f"📞 Yordam: +998 88 306 06 95\n\n"
+                f"─────────────────\n"
+                f"📢 *Yopiq kanalimiz haqida:*\n"
+                f"Oyiga *100 000 so'm* evaziga xavotir va tushkunlikdan "
+                f"chiqish yo'llarini yopiq kanalimizdan o'rganing! 👇",
                 parse_mode="Markdown",
                 reply_markup=InlineKeyboardMarkup([
-                    [InlineKeyboardButton("🔄 Testni qayta o'tkazish", callback_data="ta:restart_" + test_turi)],
+                    [InlineKeyboardButton("🔐 Yopiq kanalga kirish", url=GURUH_LINK)],
                     [InlineKeyboardButton("🏠 Asosiy menyu", callback_data="ta:menu")],
                 ])
             )
@@ -623,8 +677,21 @@ async def callback_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 text="Kerakli bo'limni tanlang:",
                 reply_markup=main_keyboard)
         elif data.startswith("ta:restart_"):
-            # Testni qayta boshlash
+            # Haftalik cheklovni tekshirib qayta boshlash
             test_turi = data.split("_")[1]
+            mumkin, qolgan_kun = can_take_test(query.from_user.id, test_turi)
+            if not mumkin:
+                test_nomi = "GAD-7" if test_turi == "gad7" else "PHQ-9"
+                await query.edit_message_text(
+                    f"⏳ *{test_nomi}* testini qayta o'tkazish uchun "
+                    f"*{qolgan_kun} kun* kutishingiz kerak.\n\n"
+                    f"Test natijalarini kuzatib borish uchun haftada bir marta o'tkazish tavsiya etiladi.",
+                    parse_mode="Markdown",
+                    reply_markup=InlineKeyboardMarkup([
+                        [InlineKeyboardButton("🏠 Asosiy menyu", callback_data="ta:menu")]
+                    ])
+                )
+                return
             context.user_data["test_turi"] = test_turi
             context.user_data["test_savol"] = 0
             context.user_data["test_ballar"] = []
