@@ -434,8 +434,8 @@ async def qabul(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(
         "⚠️ *DIQQAT — O'qib chiqing!*\n\n"
         "Doktor Nevroz, Depressiya, Fobiya, Uyqusizlik, Xavotir buzilishlari va "
-        "Xarakterdagi muammolar bilan shug'ulladilar.\n\n"
-        "Buning uchun *bemorning o'zi tuzalishni xohlashi* kerak.\n"
+        "Xarakterdagi muammolar bilan shug'ullanadilar.\n\n"
+        "Buning uchun *bemorning o'zi tuzalishni hohlashi* kerak.\n"
         "❌ Iltimos, bemorni majburlab yoki aldab olib kelmang!\n\n"
         "─────────────────\n"
         "Bundan tashqari biz quyidagi kasalliklar bilan *ishlamaymiz:*\n\n"
