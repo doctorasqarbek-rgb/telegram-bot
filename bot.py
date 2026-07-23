@@ -627,6 +627,48 @@ async def callback_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     # ── TEST JAVOBLARI ────────────────────────────────────
     if data.startswith("ta:"):
+
+        # Asosiy menyu
+        if data == "ta:menu":
+            await query.edit_message_text("Asosiy menyuga qaytdingiz.")
+            await context.bot.send_message(
+                chat_id=query.message.chat_id,
+                text="Kerakli bo'limni tanlang:",
+                reply_markup=main_keyboard)
+            return
+
+        # Qayta boshlash — haftalik cheklov bilan
+        if data.startswith("ta:restart_"):
+            test_turi = data.split("_")[1]
+            mumkin, qolgan_kun = can_take_test(query.from_user.id, test_turi)
+            if not mumkin:
+                test_nomi = "GAD-7" if test_turi == "gad7" else "PHQ-9"
+                await query.edit_message_text(
+                    f"⏳ *{test_nomi}* testini qayta o'tkazish uchun "
+                    f"*{qolgan_kun} kun* kutishingiz kerak.\n\n"
+                    f"Test natijalarini kuzatib borish uchun haftada bir marta o'tkazish tavsiya etiladi.",
+                    parse_mode="Markdown",
+                    reply_markup=InlineKeyboardMarkup([
+                        [InlineKeyboardButton("🏠 Asosiy menyu", callback_data="ta:menu")]
+                    ])
+                )
+                return
+            context.user_data["test_turi"] = test_turi
+            context.user_data["test_savol"] = 0
+            context.user_data["test_ballar"] = []
+            context.user_data["holat"] = "test_javob"
+            questions = GAD7_QUESTIONS if test_turi == "gad7" else PHQ9_QUESTIONS
+            test_nomi = "GAD-7 – Xavotir testi" if test_turi == "gad7" else "PHQ-9 – Depressiya testi"
+            bar = "⬜" * 10
+            await query.edit_message_text(
+                f"📋 *{test_nomi}*\n{bar}  0/{len(questions)}\n\n"
+                f"*{questions[0]}*\n\n_So'nggi 2 hafta ichida:_",
+                parse_mode="Markdown",
+                reply_markup=build_answer_keyboard()
+            )
+            return
+
+        # Savol javobi (0-3 ball)
         ball = int(data.split(":")[1])
         context.user_data["test_ballar"].append(ball)
         context.user_data["test_savol"] += 1
@@ -640,7 +682,7 @@ async def callback_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
             # Test tugadi — sanani bazaga yozish va natijani ko'rsatish
             jami = sum(context.user_data["test_ballar"])
             context.user_data["holat"] = None
-            record_test(query.from_user.id, test_turi)   # ← haftalik cheklov uchun
+            record_test(query.from_user.id, test_turi)
 
             if test_turi == "gad7":
                 test_nomi = "GAD-7 – Xavotir testi"
@@ -674,43 +716,8 @@ async def callback_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
                     [InlineKeyboardButton("🏠 Asosiy menyu", callback_data="ta:menu")],
                 ])
             )
-        elif data == "ta:menu":
-            await query.edit_message_text("Asosiy menyuga qaytdingiz.")
-            await context.bot.send_message(
-                chat_id=query.message.chat_id,
-                text="Kerakli bo'limni tanlang:",
-                reply_markup=main_keyboard)
-        elif data.startswith("ta:restart_"):
-            # Haftalik cheklovni tekshirib qayta boshlash
-            test_turi = data.split("_")[1]
-            mumkin, qolgan_kun = can_take_test(query.from_user.id, test_turi)
-            if not mumkin:
-                test_nomi = "GAD-7" if test_turi == "gad7" else "PHQ-9"
-                await query.edit_message_text(
-                    f"⏳ *{test_nomi}* testini qayta o'tkazish uchun "
-                    f"*{qolgan_kun} kun* kutishingiz kerak.\n\n"
-                    f"Test natijalarini kuzatib borish uchun haftada bir marta o'tkazish tavsiya etiladi.",
-                    parse_mode="Markdown",
-                    reply_markup=InlineKeyboardMarkup([
-                        [InlineKeyboardButton("🏠 Asosiy menyu", callback_data="ta:menu")]
-                    ])
-                )
-                return
-            context.user_data["test_turi"] = test_turi
-            context.user_data["test_savol"] = 0
-            context.user_data["test_ballar"] = []
-            context.user_data["holat"] = "test_javob"
-            questions = GAD7_QUESTIONS if test_turi == "gad7" else PHQ9_QUESTIONS
-            test_nomi = "GAD-7 – Xavotir testi" if test_turi == "gad7" else "PHQ-9 – Depressiya testi"
-            bar = "⬜" * 10
-            await query.edit_message_text(
-                f"📋 *{test_nomi}*\n{bar}  0/{len(questions)}\n\n"
-                f"*{questions[0]}*\n\n_So'nggi 2 hafta ichida:_",
-                parse_mode="Markdown",
-                reply_markup=build_answer_keyboard()
-            )
         else:
-            # Keyingi savolni inline xabarda ko'rsatish
+            # Keyingi savolni ko'rsatish
             filled = int((q_index / total) * 10)
             bar = "🟩" * filled + "⬜" * (10 - filled)
             test_nomi = "GAD-7 – Xavotir testi" if test_turi == "gad7" else "PHQ-9 – Depressiya testi"
