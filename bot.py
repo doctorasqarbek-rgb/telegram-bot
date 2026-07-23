@@ -651,6 +651,7 @@ async def callback_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 max_ball = 27
                 daraja, maslahat = get_phq9_result(jami)
 
+            keyingi_sana = datetime.date.today() + datetime.timedelta(days=7)
             await query.edit_message_text(
                 f"✅ *{test_nomi} yakunlandi!*\n\n"
                 f"📊 Sizning ballingiz: *{jami}/{max_ball}*\n"
@@ -660,6 +661,9 @@ async def callback_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 f"⚠️ _Bu natija tibbiy tashxis emas._\n"
                 f"Qiynalayotgan bo'lsangiz, mutaxassis bilan maslahatlashing.\n\n"
                 f"📞 Yordam: +998 88 306 06 95\n\n"
+                f"─────────────────\n"
+                f"🗓 Qaytadan tekshirmoqchi bo'lsangiz, *1 haftadan so'ng* — "
+                f"*{keyingi_sana.strftime('%d.%m.%Y')} dan* boshlab tekshirishingiz mumkin.\n\n"
                 f"─────────────────\n"
                 f"📢 *Yopiq kanalimiz haqida:*\n"
                 f"Oyiga *100 000 so'm* evaziga xavotir va tushkunlikdan "
