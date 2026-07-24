@@ -291,7 +291,7 @@ async def xizmatlar(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def jonli_qabul(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(
         "🏥 Jonli qabul\n\n"
-        "👥 Bu guruhli va individual tarzda bo'ladi, ya'ni Doktor Ergashev boshida umumiy guruhli "
+        "👥 Bu guruhli va individual tarzda bo'ladi, ya'ni Doktor Ergashev boshida umumiy guruhli"
         "2-3 soatlik dars o'tib siz va boshqalarga kasallik rivojlanish sababi va tuzalish "
         "yo'llari usullarini o'rgatadilar.\n\n"
         "🧑‍⚕️ So'ngra bemorlar yakka alohida o'zlari dori yozdirish uchun kirganda 10-15 daqiqada "
@@ -657,11 +657,32 @@ async def _send_test_question(message, context: ContextTypes.DEFAULT_TYPE):
 
 async def handle_payment_media(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.effective_user
+
+    # Admin — reklama rasmi
     if user.id == ADMIN_ID and context.user_data.get("holat") == "reklama_kutish":
         await reklama_tayyorlash(update, context)
         return
+
+    # Admin — .txt fayl orqali ommaviy qo'shish
+    if user.id == ADMIN_ID and context.user_data.get("holat") == "bulk_add":
+        doc = update.message.document
+        if doc and (doc.mime_type == "text/plain" or doc.file_name.endswith(".txt")):
+            await update.message.reply_text("📂 Fayl qabul qilindi, ishlanmoqda...")
+            fayl = await context.bot.get_file(doc.file_id)
+            import tempfile
+            with tempfile.NamedTemporaryFile(suffix=".txt", delete=False) as tmp:
+                await fayl.download_to_drive(tmp.name)
+                matn = open(tmp.name, encoding="utf-8").read()
+            await bulk_add_process(update, context, matn)
+        else:
+            await update.message.reply_text("❗ Faqat .txt fayl yuboring.")
+        return
+
+    # Admin — boshqa fayl (e'tiborsiz)
     if user.id == ADMIN_ID:
         return
+
+    # Oddiy foydalanuvchi — to'lov cheki
     holat = context.user_data.get("holat")
     if holat not in ("tolov_kutish", None, "tolov_yuborildi"):
         return
@@ -980,11 +1001,24 @@ async def kirit_boshlash(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update.effective_user.id != ADMIN_ID: return
     context.user_data["holat"] = "bulk_add"
     await update.message.reply_text(
-        "📋 Ommaviy qo'shish\n\n"
-        "Har bir a'zoni alohida qatorda yuboring.\n\n"
-        "Username bo'lsa:\n@username\n@username 2026-08-20\n\n"
-        "Username bo'lmasa, raqamli ID yozing:\n123456789\n123456789 2026-08-20\n\n"
-        "Bekor qilish uchun /bekor yozing.")
+        "📋 *Ommaviy qo'shish*\n\n"
+        "Quyidagi usullardan birini tanlang:\n\n"
+        "━━━━━━━━━━━━━━━\n"
+        "*1️⃣ Chatga yozib yuborish:*\n"
+        "Har bir a'zoni alohida qatorda yuboring:\n\n"
+        "@username\n"
+        "@username 2026-09-01\n"
+        "123456789\n"
+        "123456789 2026-09-01\n\n"
+        "━━━━━━━━━━━━━━━\n"
+        "*2️⃣ .txt fayl yuklash:*\n"
+        "Xuddi shu formatda .txt fayl tayyorlab yuboring — bot avtomatik o'qiydi.\n\n"
+        "━━━━━━━━━━━━━━━\n"
+        "📌 Sana ko'rsatilmasa — bugundan *30 kun* avtomatik qo'shiladi.\n"
+        "Sana formati: YYYY-MM-DD (masalan 2026-09-01)\n\n"
+        "Bekor qilish uchun /bekor yozing.",
+        parse_mode="Markdown"
+    )
 
 
 async def bekor_qilish(update: Update, context: ContextTypes.DEFAULT_TYPE):
