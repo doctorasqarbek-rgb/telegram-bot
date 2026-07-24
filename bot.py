@@ -291,7 +291,7 @@ async def xizmatlar(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def jonli_qabul(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(
         "🏥 Jonli qabul\n\n"
-        "👥 Bu guruhli va individual tarzda bo'ladi, ya'ni Doktor Ergashev boshida umumiy "
+        "👥 Bu guruhli va individual tarzda bo'ladi, ya'ni Doktor Ergashev boshida umumiy guruhli "
         "2-3 soatlik dars o'tib siz va boshqalarga kasallik rivojlanish sababi va tuzalish "
         "yo'llari usullarini o'rgatadilar.\n\n"
         "🧑‍⚕️ So'ngra bemorlar yakka alohida o'zlari dori yozdirish uchun kirganda 10-15 daqiqada "
