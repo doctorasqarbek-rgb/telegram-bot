@@ -3,6 +3,7 @@ import datetime
 import logging
 import os
 import asyncio
+import tempfile
 from zoneinfo import ZoneInfo
 
 TASHKENT_TZ = ZoneInfo("Asia/Tashkent")
@@ -291,7 +292,7 @@ async def xizmatlar(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def jonli_qabul(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(
         "🏥 Jonli qabul\n\n"
-        "👥 Bu guruhli va individual tarzda bo'ladi, ya'ni Doktor Ergashev boshida umumiy guruhli"
+        "👥 Bu guruhli va individual tarzda bo'ladi, ya'ni Doktor Ergashev boshida umumiy guruhli "
         "2-3 soatlik dars o'tib siz va boshqalarga kasallik rivojlanish sababi va tuzalish "
         "yo'llari usullarini o'rgatadilar.\n\n"
         "🧑‍⚕️ So'ngra bemorlar yakka alohida o'zlari dori yozdirish uchun kirganda 10-15 daqiqada "
@@ -669,10 +670,11 @@ async def handle_payment_media(update: Update, context: ContextTypes.DEFAULT_TYP
         if doc and (doc.mime_type == "text/plain" or doc.file_name.endswith(".txt")):
             await update.message.reply_text("📂 Fayl qabul qilindi, ishlanmoqda...")
             fayl = await context.bot.get_file(doc.file_id)
-            import tempfile
             with tempfile.NamedTemporaryFile(suffix=".txt", delete=False) as tmp:
-                await fayl.download_to_drive(tmp.name)
-                matn = open(tmp.name, encoding="utf-8").read()
+                tmp_path = tmp.name
+            await fayl.download_to_drive(tmp_path)
+            matn = open(tmp_path, encoding="utf-8", errors="ignore").read()
+            os.unlink(tmp_path)
             await bulk_add_process(update, context, matn)
         else:
             await update.message.reply_text("❗ Faqat .txt fayl yuboring.")
@@ -1028,28 +1030,103 @@ async def bekor_qilish(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 async def bulk_add_process(update: Update, context: ContextTypes.DEFAULT_TYPE, text: str):
-    lines = [ln.strip() for ln in text.strip().split("\n") if ln.strip()]
-    natija = []
-    for line in lines:
+    lines = [ln.strip() for ln in text.strip().split("\n")
+             if ln.strip() and not ln.strip().startswith("#")]
+    if not lines:
+        await update.message.reply_text("❗ Fayl bo'sh yoki noto'g'ri format.")
+        context.user_data["holat"] = None
+        return
+
+    jami = len(lines)
+    muvaffaq = 0
+    xato = 0
+    natija_muvaffaq = []
+    natija_xato = []
+
+    # Progress xabari
+    progress_msg = await update.message.reply_text(
+        f"⏳ Ishlanmoqda: 0/{jami}...")
+
+    for i, line in enumerate(lines):
         parts = line.split()
         identifikator = parts[0]
         sana_str = parts[1] if len(parts) > 1 else None
+
+        # Sana tekshirish
         try:
-            end_date = datetime.date.fromisoformat(sana_str) if sana_str else datetime.date.today() + datetime.timedelta(days=30)
+            end_date = (datetime.date.fromisoformat(sana_str)
+                        if sana_str
+                        else datetime.date.today() + datetime.timedelta(days=30))
         except ValueError:
-            natija.append("❌ " + identifikator + " — sana formati noto'g'ri (YYYY-MM-DD kerak)")
+            natija_xato.append(f"❌ {identifikator} — sana noto'g'ri (YYYY-MM-DD kerak)")
+            xato += 1
             continue
+
+        # Foydalanuvchini topish
         try:
             if identifikator.lstrip("-").isdigit():
-                chat = await context.bot.get_chat(int(identifikator))
+                # Raqamli ID — get_chat ishlatmasdan to'g'ridan bazaga yozamiz
+                uid = int(identifikator)
+                add_subscriber_with_date(uid, None, str(uid), end_date)
+                natija_muvaffaq.append(f"✅ {identifikator} → {end_date} gacha")
             else:
-                chat = await context.bot.get_chat("@" + identifikator.lstrip("@"))
-            add_subscriber_with_date(chat.id, chat.username, chat.full_name, end_date)
-            natija.append("✅ " + identifikator + " qo'shildi: " + str(chat.full_name) + " (" + str(end_date) + " gacha)")
+                # Username — get_chat kerak (lekin sekin)
+                uname = identifikator.lstrip("@")
+                chat = await context.bot.get_chat("@" + uname)
+                add_subscriber_with_date(chat.id, chat.username, chat.full_name or uname, end_date)
+                natija_muvaffaq.append(
+                    f"✅ @{uname} → {chat.full_name or uname} ({end_date} gacha)")
+            muvaffaq += 1
         except Exception as e:
-            natija.append("❌ " + identifikator + " — topilmadi (" + str(e) + ")")
+            xatolar = str(e)
+            natija_xato.append(f"❌ {identifikator} — topilmadi")
+            xato += 1
+
+        # Har 5 ta'da progress yangilaymiz
+        if (i + 1) % 5 == 0 or (i + 1) == jami:
+            try:
+                await progress_msg.edit_text(
+                    f"⏳ Ishlanmoqda: {i+1}/{jami}...\n"
+                    f"✅ Muvaffaqiyatli: {muvaffaq} | ❌ Xato: {xato}")
+            except Exception:
+                pass
+
+        # Rate limit uchun kutish (username bo'lsa)
+        if not identifikator.lstrip("-").isdigit():
+            await asyncio.sleep(0.3)
+
+    # Yakuniy natija
     context.user_data["holat"] = None
-    await update.message.reply_text("Natija:\n\n" + "\n".join(natija))
+
+    xulosa = f"📊 *Yakuniy natija:*\n✅ Qo'shildi: {muvaffaq} ta\n❌ Xato: {xato} ta\n\n"
+
+    if natija_muvaffaq:
+        xulosa += "*Muvaffaqiyatli:*\n" + "\n".join(natija_muvaffaq[:30])
+        if len(natija_muvaffaq) > 30:
+            xulosa += f"\n...va yana {len(natija_muvaffaq)-30} ta"
+
+    if natija_xato:
+        xulosa += "\n\n*Xatolar:*\n" + "\n".join(natija_xato[:20])
+
+    # Xabar uzun bo'lsa faylga yozib yuboramiz
+    if len(xulosa) > 3500:
+        fayl_matn = f"Muvaffaqiyatli ({muvaffaq} ta):\n"
+        fayl_matn += "\n".join(natija_muvaffaq)
+        fayl_matn += f"\n\nXatolar ({xato} ta):\n"
+        fayl_matn += "\n".join(natija_xato)
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".txt",
+                                          delete=False, encoding="utf-8") as f:
+            f.write(fayl_matn)
+            tmp_path = f.name
+        with open(tmp_path, "rb") as f:
+            await context.bot.send_document(
+                chat_id=update.effective_chat.id,
+                document=f,
+                filename="natija.txt",
+                caption=f"✅ Qo'shildi: {muvaffaq} ta | ❌ Xato: {xato} ta")
+        os.unlink(tmp_path)
+    else:
+        await update.message.reply_text(xulosa, parse_mode="Markdown")
 
 
 async def azolar(update: Update, context: ContextTypes.DEFAULT_TYPE):
