@@ -15,7 +15,7 @@ from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, Con
 
 logging.basicConfig(level=logging.INFO)
 
-TOKEN = os.environ.get("BOT_TOKEN", "6411235489:AAEqW4eNu04qOsEmnwDImZrBvKUIhtm1TSE")
+TOKEN = os.environ.get("BOT_TOKEN", "6411235489:AAHZSB-0cOLOLI4LjF61CUPGmU-xtG2xgP4")
 ADMIN_ID = 741361382
 KARTA_RAQAM = "9860 1606 0775 6576"
 KARTA_EGASI = "Sevinch Ergasheva"
@@ -532,15 +532,39 @@ async def manzilni_korsat(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "🗺 LOKATSIYA:\nhttps://yandex.com/navi/?whatshere%5Bzoom%5D=18&whatshere%5Bpoint%5D=69.296029%2C41.364923&lang=uz&from=navi")
 
 
+# ==========================================================
+# YOPIQ GURUH — KIRISH / OBUNANI UZAYTIRISH
+# ==========================================================
+
 async def guruhga_kirish(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """
+    Yopiq guruhga kirish tugmasi bosilganda ishlaydi.
+    Foydalanuvchi hali FAOL a'zo bo'lsa — uni bloklamaydi,
+    balki "Obunani uzaytirish" imkoniyatini taklif qiladi.
+    """
     user = update.effective_user
     sub = get_subscriber(user.id)
+
     if sub and sub[5] == 1:
         await update.message.reply_text(
-            "Siz allaqachon faol a'zo siz!\n\nObuna tugash sanasi: " + str(sub[4]) + "\n\nGuruh linki:\n" + GURUH_LINK,
-            reply_markup=main_keyboard)
+            "✅ Siz allaqachon faol a'zosiz!\n\n"
+            "📅 Obuna tugash sanasi: " + str(sub[4]) + "\n\n"
+            "Muddatingiz tugashidan oldin ham to'lov qilib, obunangizni "
+            "shu sanadan boshlab uzaytirishingiz mumkin.",
+            reply_markup=ReplyKeyboardMarkup(
+                [["🔄 Obunani uzaytirish"], ["⬅️ Ortga"]],
+                resize_keyboard=True))
         return
 
+    await tolov_korsat(update, context)
+
+
+async def tolov_korsat(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """
+    QR-kod va to'lov ko'rsatmalarini chiqaradi.
+    Yangi obuna bo'lish uchun ham, mavjud obunani uzaytirish uchun ham
+    shu funksiya ishlatiladi.
+    """
     await update.message.reply_text(
         "🔐 Yopiq kanal\n\n"
         "💎 Bu guruhda inson ruhiyati, ruhiy buzilish va kasalliklar haqidagi qimmatli "
@@ -582,7 +606,7 @@ async def guruhga_kirish(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     await update.message.reply_text(
         "❗️ To'lovni amalga oshirgach, to'lov tasdig'i (chek yoki skrinshot) rasmini "
-        "shu chatga yuboring.\nAdmin 5-10 daqiqa ichida guruh linkini yuboradi.",
+        "shu chatga yuboring.\nAdmin 5-10 daqiqa ichida to'lovingizni tasdiqlaydi.",
         reply_markup=tolov_keyboard)
     context.user_data["holat"] = "tolov_kutish"
 
@@ -1264,6 +1288,7 @@ async def handle_buttons(update: Update, context: ContextTypes.DEFAULT_TYPE):
     elif text in ("Qabulga yozilish", "🟢 Qabulga yozilish"): await qabul(update, context)
     elif text == "✅ Ha, tushundim — yozilaman": await qabul_boshlash(update, context)
     elif text == "💳 Yopiq guruhga kirish": await guruhga_kirish(update, context)
+    elif text == "🔄 Obunani uzaytirish": await tolov_korsat(update, context)
     elif text == "✅ To'lovni tasdiqlayman":
         if context.user_data.get("holat") == "tolov_kutish":
             await update.message.reply_text("📸 To'lov chekining rasmini yuboring.")
