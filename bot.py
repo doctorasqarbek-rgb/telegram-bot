@@ -559,6 +559,50 @@ async def guruhga_kirish(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await tolov_korsat(update, context)
 
 
+def find_qr_path():
+    """QR-kod fayli joylashgan yo'lni qidiradi. Topilmasa None qaytaradi."""
+    mumkin_boigan_yollar = [
+        os.path.join(os.path.dirname(os.path.abspath(__file__)), XOLIS_QR_FAYL),
+        os.path.join(os.getcwd(), XOLIS_QR_FAYL),
+        XOLIS_QR_FAYL,
+    ]
+    for yol in mumkin_boigan_yollar:
+        logging.info(f"QR fayl qidirilmoqda: {yol} -> mavjud: {os.path.exists(yol)}")
+        if os.path.exists(yol):
+            return yol
+    logging.warning(f"QR fayl topilmadi. Tekshirilgan yo'llar: {mumkin_boigan_yollar}")
+    return None
+
+
+async def send_qr_code(context: ContextTypes.DEFAULT_TYPE, chat_id: int):
+    """
+    Berilgan chat_id ga QR-kod rasmini yuboradi.
+    Yangi obuna oqimida ham, uzaytirish oqimida ham,
+    muddat tugashi haqidagi ogohlantirish xabarida ham ishlatiladi.
+    Qaytaruvchi qiymat: QR muvaffaqiyatli yuborilgan bo'lsa True, aks holda False.
+    """
+    qr_path = find_qr_path()
+    if not qr_path:
+        return False
+    try:
+        with open(qr_path, "rb") as qr_photo:
+            await context.bot.send_photo(
+                chat_id=chat_id,
+                photo=qr_photo,
+                caption=(
+                    "📱 QR-kod orqali to'lash\n\n"
+                    "Ushbu QR-kodni istalgan bank yoki to'lov ilovasi "
+                    "(Payme, Click, biror bank ilovasi va h.k.) orqali skanerlang.\n\n"
+                    "💡 Agar bitta telefon ishlatsangiz: rasmni saqlab, "
+                    "to'lov ilovasidagi QR skaner bo'limida \"Galereyadan tanlash\" "
+                    "orqali yuklashingiz mumkin.\n\n"
+                    "💰 To'lanishi kerak summa: " + NARX))
+        return True
+    except Exception as e:
+        logging.error("QR yuborishda xatolik: " + str(e))
+        return False
+
+
 async def tolov_korsat(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """
     QR-kod va to'lov ko'rsatmalarini chiqaradi.
@@ -576,33 +620,13 @@ async def tolov_korsat(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "🎬 Qanday kirish kerakligi haqida videoqo'llanma:\n" + VIDEO_QOLLANMA_LINK + "\n\n"
         "💳 To'lov QR-kod orqali amalga oshiriladi:")
 
-    mumkin_boigan_yollar = [
-        os.path.join(os.path.dirname(os.path.abspath(__file__)), XOLIS_QR_FAYL),
-        os.path.join(os.getcwd(), XOLIS_QR_FAYL),
-        XOLIS_QR_FAYL,
-    ]
-    qr_path = None
-    for yol in mumkin_boigan_yollar:
-        logging.info(f"QR fayl qidirilmoqda: {yol} -> mavjud: {os.path.exists(yol)}")
-        if os.path.exists(yol):
-            qr_path = yol
-            break
-
-    if qr_path:
-        with open(qr_path, "rb") as qr_photo:
-            await context.bot.send_photo(
-                chat_id=update.effective_chat.id,
-                photo=qr_photo,
-                caption=(
-                    "📱 QR-kod orqali to'lash\n\n"
-                    "Ushbu QR-kodni istalgan bank yoki to'lov ilovasi "
-                    "(Payme, Click, biror bank ilovasi va h.k.) orqali skanerlang.\n\n"
-                    "💡 Agar bitta telefon ishlatsangiz: rasmni saqlab, "
-                    "to'lov ilovasidagi QR skaner bo'limida \"Galereyadan tanlash\" "
-                    "orqali yuklashingiz mumkin.\n\n"
-                    "💰 To'lanishi kerak summa: " + NARX))
-    else:
-        logging.warning(f"QR fayl topilmadi. Tekshirilgan yo'llar: {mumkin_boigan_yollar}")
+    qr_yuborildi = await send_qr_code(context, update.effective_chat.id)
+    if not qr_yuborildi:
+        await update.message.reply_text(
+            "💳 Karta orqali to'lash\n\n"
+            "Karta raqami: " + KARTA_RAQAM + "\n"
+            "Karta egasi: " + KARTA_EGASI + "\n"
+            "Summa: " + NARX)
 
     await update.message.reply_text(
         "❗️ To'lovni amalga oshirgach, to'lov tasdig'i (chek yoki skrinshot) rasmini "
@@ -1223,10 +1247,17 @@ async def warn_expiring_subscriptions(context: ContextTypes.DEFAULT_TYPE):
             await context.bot.send_message(chat_id=uid, text=
                 "⏰ Obuna muddatingiz tugashiga bir necha kun qoldi!\n\n"
                 "📅 Muddat: " + str(ed) + "\n\n"
-                "Guruhda qolish uchun qayta to'lov qiling:\n\n"
-                "💳 Karta: " + KARTA_RAQAM + "\n"
-                "👤 Egasi: " + KARTA_EGASI + "\n"
-                "💰 Narxi: " + NARX + "\n\n"
+                "Guruhda qolish uchun qayta to'lov qiling — QR-kodni skanerlang "
+                "yoki quyidagi karta raqamiga o'tkazing:")
+
+            qr_yuborildi = await send_qr_code(context, uid)
+            if not qr_yuborildi:
+                await context.bot.send_message(chat_id=uid, text=
+                    "💳 Karta: " + KARTA_RAQAM + "\n"
+                    "👤 Egasi: " + KARTA_EGASI + "\n"
+                    "💰 Narxi: " + NARX)
+
+            await context.bot.send_message(chat_id=uid, text=
                 "To'lovdan so'ng chekni botga yuboring — admin tasdiqlaydi va obunangiz uzaytiriladi.")
             mark_warned(uid)
         except Exception as e:
